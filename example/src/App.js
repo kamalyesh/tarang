@@ -6,33 +6,9 @@ import 'tarang/dist/index.css'
 const App = () => {
   const initialSrcArray = [
     {
-      audioUrl: "https://tarang.surge.sh/audio/tom-and-jerry-ringtone.mp3",
-      coverArtUrl: "https://tarang.surge.sh/images/tom-and-jerry-ringtone-cover.png"
-    },
-    // {
-    //   audioUrl: "audio/Ainz-Ooal-Gown.mp3",
-    //   coverArtUrl: "images/Ainz-Ooal-Gown-cover.png"
-    // },
-    // {
-    //   audioUrl: "audio/aLIEz.mp3",
-    //   coverArtUrl: "images/aLIEz-cover.png"
-    // },
-    // {
-    //   audioUrl: "audio/First-Light.mp3",
-    //   coverArtUrl: "images/First-Light-cover.gif"
-    // },
-    // {
-    //   audioUrl: "audio/SaO.mp3",
-    //   coverArtUrl: "images/SaO-cover.png"
-    // },
-    // {
-    //   audioUrl: "audio/theDevilRegainsHisStrength.mp3",
-    //   coverArtUrl: "images/theDevilRegainsHisStrength-cover.png"
-    // },
-    // {
-    //   audioUrl: "audio/VORACITY.mp3",
-    //   coverArtUrl: "images/VORACITY-cover.png"
-    // }
+      audioUrl: "https://tarang.surge.sh/audio/example.mp3",
+      coverArtUrl: "https://tarang.surge.sh/images/example-cover.png"
+    }
   ]
 
   const DEFAULT_SRC = 0
