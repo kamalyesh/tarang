@@ -1,8 +1,12 @@
-# tarang
+# Tarang
 
 > audio frequency virtualization using d3 graph for react
 
 [![NPM](https://img.shields.io/npm/v/tarang.svg)](https://www.npmjs.com/package/tarang) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+
+# Example
+
+[example here](https://tarang-demo.surge.sh)
 
 ## Install
 
