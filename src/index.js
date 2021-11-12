@@ -1,6 +1,14 @@
-import React from 'react'
-import styles from './styles.module.css'
+import binaryCeil from "./lib/utils/binaryCeil"
+import binaryFloor from "./lib/utils/binaryFloor"
 
-export const ExampleComponent = ({ text }) => {
-  return <div className={styles.test}>Example Component: {text}</div>
+import Bar from "./lib/components/Bar"
+import Line from "./lib/components/Line"
+
+export const Tarang = {
+  Bar,
+  Line,
+  utils: {
+    binaryCeil,
+    binaryFloor
+  }
 }

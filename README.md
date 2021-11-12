@@ -12,15 +12,38 @@ npm install --save tarang
 
 ## Usage
 
+### Bar visualization
 ```jsx
 import React, { Component } from 'react'
 
-import MyComponent from 'tarang'
+import Tarang from 'tarang'
 import 'tarang/dist/index.css'
 
 class Example extends Component {
   render() {
-    return <MyComponent />
+    return <Tarang.Bar
+        width={500}
+        controls={true}
+        audioUrl={"url-of-mp3-file"}
+      />
+  }
+}
+```
+
+### Line visualization
+```jsx
+import React, { Component } from 'react'
+
+import Tarang from 'tarang'
+import 'tarang/dist/index.css'
+
+class Example extends Component {
+  render() {
+    return <Tarang.Line
+        width={500}
+        controls={true}
+        audioUrl={"url-of-mp3-file"}
+      />
   }
 }
 ```
