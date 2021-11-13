@@ -6,7 +6,9 @@
 
 # Example
 
-[example here](https://tarang-demo.surge.sh)
+[example here](https://kamalyesh.github.io/tarang/)
+
+[alternate link](https://tarang-demo.surge.sh)
 
 ## Install
 
