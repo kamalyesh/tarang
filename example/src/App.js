@@ -12,13 +12,13 @@ const App = () => {
   ]
 
   const DEFAULT_SRC = 0
-  const [srcArray, updateSrcArray] = useState(initialSrcArray)
+  const [srcArray, updateSrcArray] = useState([...initialSrcArray])
   const [src, updateSrc] = useState(DEFAULT_SRC)
   const [newUrl, setNewUrl] = useState('')
   const [lineControlsVisible, setLineControlsVisible] = useState(true)
   const [barControlsVisible, setBarControlsVisible] = useState(true)
 
-  const reset = () => { updateSrcArray(initialSrcArray); updateSrc(DEFAULT_SRC); updateNewUrl(''); }
+  const reset = () => { updateSrcArray([initialSrcArray[0]]); updateSrc(DEFAULT_SRC); setNewUrl(''); }
   const setSrc = (index) => { updateSrc(index) }
   const updateNewUrl = () => {
     if (newUrl) {
@@ -50,7 +50,7 @@ const App = () => {
                     }
                     <tr>
                       <td>
-                        <input style={{ width: "90%" }} type="url" value={newUrl} onChange={(e) => setNewUrl(e.target.value)} />
+                        <input style={{ width: "90%" }} type="url" value={newUrl} onChange={(e) => setNewUrl(e.target.value)} placeholder="Enter mp3 url" />
                       </td>
                       <td>
                         <button type="button" onClick={updateNewUrl}>Set</button>
