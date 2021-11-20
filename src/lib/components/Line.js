@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState, Fragment } from "react";
 import binaryFloor from "../utils/binaryFloor";
+import constants from "../constants";
+const initialDimensions = constants.DEFAULT_DIMENSIONS
 import * as d3 from 'd3'
 import idman from 'idman';
 const { getNextId } = idman;
 
 export default function Line({ audioUrl, coverArtUrl, width, height, controls = false }) {
     // TODO: add state loaded. to check that the user has interacted with the page. so that the autoplay functionality can also be added in future
-    const initialDimensions = { WIDTH: 256, HEIGHT: 280, CONTROLS_HEIGHT: 30 }
     const [isPlaying, setIsPlaying] = useState(false)
     const [canvasId, setCanvasId] = useState(getNextId())
     const [dimensions, setDimensions] = useState(initialDimensions)
@@ -22,44 +23,59 @@ export default function Line({ audioUrl, coverArtUrl, width, height, controls = 
     }, [controls])
 
     useEffect(() => {
-        if (width != dimensions.WIDTH) {
+        clearSvg()
+        if (!isNaN(width) && width != dimensions.WIDTH) {
             setDimensions(newDimensions => {
                 return {
                     ...newDimensions,
                     WIDTH: binaryFloor(width)
                 }
             });
-            clearSvg()
         }
     }, [width])
 
-    // useEffect(() => {
-    //     if (height && height != dimensions.HEIGHT) {
-    //         if (height > 60) {
-    //             setDimensions(newDimensions => {
-    //                 return {
-    //                     ...newDimensions,
-    //                     HEIGHT: height
-    //                 }
-    //             });
-    //         } else {
-    //             setDimensions(newDimensions => {
-    //                 return {
-    //                     ...newDimensions,
-    //                     HEIGHT: 60
-    //                 }
-    //             });
-    //         }
-    //         clearSvg()
-    //     }
-    // }, [height])
+    useEffect(() => {
+        clearSvg()
+        if (!isNaN(height) && height != dimensions.HEIGHT) {
+            if (height > dimensions.CONTROLS_HEIGHT * 2) {
+                setDimensions(newDimensions => {
+                    return {
+                        ...newDimensions,
+                        HEIGHT: height
+                    }
+                });
+            } else {
+                setDimensions(newDimensions => {
+                    return {
+                        ...newDimensions,
+                        HEIGHT: dimensions.CONTROLS_HEIGHT * 2
+                    }
+                });
+            }
+        }
+    }, [height])
 
     const clearSvg = () => {
         if (svgRef.current) svgRef.current.selectAll("*").remove()
         // console.log("clearing svg")
     }
 
+    const getSvgHeightScale = () => {
+        let assumedHeight = parseInt(dimensions.WIDTH * 0.5)
+        let ratio = Math.abs(dimensions.HEIGHT - assumedHeight) / assumedHeight
+        // console.log({ assumedHeight }, { ratio })
+        return ratio
+    }
+    // const getSvgHeight = () => {
+    //     let ratio = getSvgHeightScale()
+    //     let newHeight = dimensions.HEIGHT * ratio
+    //     console.log({newHeight}, {dimensions})
+    //     return newHeight        
+    // }
+
+
     const updateSvg = (frequencies, height = dimensions.HEIGHT, width = dimensions.WIDTH) => {
+        let _scale = getSvgHeightScale()
         analyserRef.current.getByteFrequencyData(frequencies);
         if (svgRef.current && frequencies.length) {
             clearSvg()
@@ -68,7 +84,7 @@ export default function Line({ audioUrl, coverArtUrl, width, height, controls = 
                     return i * (width / frequencies.length);
                 })
                 .y(function (d) {
-                    return height - d;
+                    return height - (d * _scale);
                 })
             svgRef.current.append('path')
                 .attr('d', lineFunc(frequencies))
@@ -87,13 +103,14 @@ export default function Line({ audioUrl, coverArtUrl, width, height, controls = 
         if (!d3) console.warn("d3 is not found. Tarang may not behave as expected.")
         else {
             // console.log("creating visualization graph ", { d3 })
+            let background = coverArtUrl ? `background: liniear-gradient(to bottom, rgba(245, 246, 252, 0.52), rgba(117, 118, 124, 0.78), url(${coverArtUrl}));` : 'background: liniear-gradient(to bottom, rgba(245, 246, 252, 0.26), rgba(117, 118, 124, 0.39))'
             if (!svgRef.current) {
                 svgRef.current = d3.select('#' + canvasId)
                     .append('svg')
                     .attr('height', height)
                     .attr('width', width)
                     .attr('class', 'my-1')
-                    .attr('style', coverArtUrl ? `background: liniear-gradient(to bottom, rgba(245, 246, 252, 0.52), rgba(117, 118, 124, 0.78), url(${coverArtUrl}));` : 'background: liniear-gradient(to bottom, rgba(245, 246, 252, 0.26), rgba(117, 118, 124, 0.39))')
+                    .attr('style', `${background}`)
                     .attr('id', "line_" + canvasId + "_" + getNextId());
             }
 

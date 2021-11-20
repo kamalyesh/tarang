@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState, Fragment } from "react";
 import binaryFloor from "../utils/binaryFloor";
+import constants from "../constants";
+const initialDimensions = constants.DEFAULT_DIMENSIONS
 import * as d3 from 'd3'
 import idman from 'idman';
 const { getNextId } = idman;
 
 export default function Bar({ audioUrl, coverArtUrl, width, height, controls = false }) {
     // TODO: add state loaded. to check that the user has interacted with the page. so that the autoplay functionality can also be added in future
-    const initialDimensions = { WIDTH: 256, HEIGHT: 280, CONTROLS_HEIGHT: 30 }
     const [isPlaying, setIsPlaying] = useState(false)
     const [canvasId, setCanvasId] = useState(getNextId())
     const [dimensions, setDimensions] = useState(initialDimensions)
@@ -23,6 +24,7 @@ export default function Bar({ audioUrl, coverArtUrl, width, height, controls = f
     }, [controls])
 
     useEffect(() => {
+        clearSvg()
         if (!isNaN(width) && width != dimensions.WIDTH) {
             setDimensions(newDimensions => {
                 return {
@@ -30,39 +32,52 @@ export default function Bar({ audioUrl, coverArtUrl, width, height, controls = f
                     WIDTH: binaryFloor(width)
                 }
             });
-            clearSvg()
         }
     }, [width])
 
-    // useEffect(() => {
-    //     if (!isNaN(height) && height != dimensions.HEIGHT) {
-    //         if (height > 280) {
-    //             setDimensions(newDimensions => {
-    //                 return {
-    //                     ...newDimensions,
-    //                     HEIGHT: height
-    //                 }
-    //             });
-    //         } else {
-    //             setDimensions(newDimensions => {
-    //                 return {
-    //                     ...newDimensions,
-    //                     HEIGHT: 280
-    //                 }
-    //             });
-    //         }
-    //         clearSvg()
-    //     }
-    // }, [height])
+    useEffect(() => {
+        clearSvg()
+        if (!isNaN(height) && height != dimensions.HEIGHT) {
+            if (height > dimensions.CONTROLS_HEIGHT * 2) {
+                setDimensions(newDimensions => {
+                    return {
+                        ...newDimensions,
+                        HEIGHT: height
+                    }
+                });
+            } else {
+                setDimensions(newDimensions => {
+                    return {
+                        ...newDimensions,
+                        HEIGHT: dimensions.CONTROLS_HEIGHT * 2
+                    }
+                });
+            }
+        }
+    }, [height])
 
     const clearSvg = () => {
         if (svgRef.current) svgRef.current.selectAll("*").remove()
         // console.log("clearing svg")
     }
 
+    const getSvgHeightScale = () => {
+        let assumedHeight = parseInt(dimensions.WIDTH * 0.5)
+        let ratio = Math.abs(dimensions.HEIGHT - assumedHeight) / assumedHeight
+        console.log({ assumedHeight }, { ratio })
+        return ratio
+    }
+    // const getSvgHeight = () => {
+    //     let ratio = getSvgHeightScale()
+    //     let newHeight = dimensions.HEIGHT * ratio
+    //     console.log({newHeight}, {dimensions})
+    //     return newHeight        
+    // }
+
     const updateSvg = (frequencies, height = dimensions.HEIGHT, width = dimensions.WIDTH) => {
         analyserRef.current.getByteFrequencyData(frequencies);
         if (svgRef.current && frequencies.length) {
+            let _scale = getSvgHeightScale()
             svgRef.current.selectAll('rect')
                 .data(frequencies)
                 .enter()
@@ -77,10 +92,10 @@ export default function Bar({ audioUrl, coverArtUrl, width, height, controls = f
             svgRef.current.selectAll('rect')
                 .data(frequencies)
                 .attr('y', function (d, i) {
-                    return height - d
+                    return height - (d * _scale)
                 })
                 .attr('height', function (d, i) {
-                    return d
+                    return (d * _scale)
                 });
         }
     }

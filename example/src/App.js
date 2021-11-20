@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 
+
 import { Tarang } from 'tarang'
 import 'tarang/dist/index.css'
 
@@ -17,6 +18,12 @@ const App = () => {
   const [newUrl, setNewUrl] = useState('')
   const [lineControlsVisible, setLineControlsVisible] = useState(true)
   const [barControlsVisible, setBarControlsVisible] = useState(true)
+  // const [lineDimensionsFormValues, setLineDimensionsFormValues] = useState(Tarang.DEFAULT_DIMENSIONS)
+  // const [barDimensionsFormValues, setBarDimensionsFormValues] = useState(Tarang.DEFAULT_DIMENSIONS)
+  const [lineDimensions, setLineDimensions] = useState(Tarang.DEFAULT_DIMENSIONS)
+  const [barDimensions, setBarDimensions] = useState(Tarang.DEFAULT_DIMENSIONS)
+  const [lineVisualizationUpdating, setLineVisualizationUpdating] = useState(false)
+  const [barVisualizationUpdating, setBarVisualizationUpdating] = useState(false)
 
   const reset = () => { updateSrcArray([initialSrcArray[0]]); updateSrc(DEFAULT_SRC); setNewUrl(''); }
   const setSrc = (index) => { updateSrc(index) }
@@ -31,6 +38,22 @@ const App = () => {
     return src.length ? src[src.length - 1] : src;
   }
 
+  // const updateLineVisualization = () => {
+  //   setLineVisualizationUpdating(true)
+  //   setLineDimensions(lineDimensionsFormValues)
+  //   setTimeout(() => {
+  //     setLineVisualizationUpdating(false)
+  //   }, [100])
+  // }
+
+  // const updateBarVisualization = () => {
+  //   setBarVisualizationUpdating(true)
+  //   setBarDimensions(barDimensionsFormValues)
+  //   setTimeout(() => {
+  //     setBarVisualizationUpdating(false)
+  //   }, [100])
+  // }
+
   return (
     <div className="App">
       <section>
@@ -44,7 +67,7 @@ const App = () => {
                     {
                       srcArray.map((srcItem, srcIndex) => <tr key={JSON.stringify(srcItem).length + "_" + srcIndex} style={{ "textDecoration": "link", "cursor": "pointer" }}>
                         <td>
-                          <a target="_self" onClick={() => setSrc(srcIndex)}>{getFileName(srcItem.audioUrl)}</a>
+                          <button onClick={() => setSrc(srcIndex)}>{getFileName(srcItem.audioUrl)}</button>
                         </td>
                       </tr>) || null
                     }
@@ -84,7 +107,7 @@ const App = () => {
             </tr>
             <tr>
               <td>
-                <legend>Virtualization as Bar Graph</legend>
+                <legend>Virtualization as Line Graph</legend>
                 <table>
                   <tbody>
                     <tr>
@@ -97,20 +120,34 @@ const App = () => {
                     <tr>
                       <td>
                         <div style={{ position: 'relative' }}>
-                          <Tarang.Line
-                            width={500}
-                            controls={lineControlsVisible}
-                            audioUrl={srcArray[src].audioUrl}
-                            coverArtUrl={srcArray[src].coverArtUrl}
-                          />
+                          {
+                            lineVisualizationUpdating ?
+                              null :
+                              <Tarang.Line
+                                width={lineDimensions.WIDTH}
+                                height={lineDimensions.HEIGHT}
+                                controls={lineControlsVisible}
+                                audioUrl={srcArray[src].audioUrl}
+                                coverArtUrl={srcArray[src].coverArtUrl}
+                              />
+                          }
                         </div>
                       </td>
                     </tr>
+                    {/* <tr>
+                      <td>
+                        <div style={{ position: 'relative', display: "flex" }}>
+                          <input title="width of line type visualization" type="number" value={lineDimensionsFormValues.WIDTH} onChange={(e) => setLineDimensionsFormValues(dim => { return { ...dim, WIDTH: e.target.value } })} />
+                          <input title="height of line type visualization" type="number" value={lineDimensionsFormValues.HEIGHT} onChange={(e) => setLineDimensionsFormValues(dim => { return { ...dim, HEIGHT: e.target.value } })} />
+                          <input type="button" onClick={updateLineVisualization} value="Set" />
+                        </div>
+                      </td>
+                    </tr> */}
                   </tbody>
                 </table>
               </td>
               <td>
-                <legend>Virtualization as Line Graph</legend>
+                <legend>Virtualization as Bar Graph</legend>
                 <table>
                   <tbody>
                     <tr>
@@ -123,15 +160,111 @@ const App = () => {
                     <tr>
                       <td>
                         <div style={{ position: 'relative' }}>
-                          <Tarang.Bar
-                            width={500}
-                            controls={barControlsVisible}
-                            audioUrl={srcArray[src].audioUrl}
-                            coverArtUrl={srcArray[src].coverArtUrl}
-                          />
+                          {
+                            barVisualizationUpdating ?
+                              null :
+                              <Tarang.Bar
+                                width={barDimensions.WIDTH}
+                                height={barDimensions.HEIGHT}
+                                controls={barControlsVisible}
+                                audioUrl={srcArray[src].audioUrl}
+                                coverArtUrl={srcArray[src].coverArtUrl}
+                              />
+                          }
                         </div>
                       </td>
                     </tr>
+                    {/* <tr>
+                      <td>
+                        <div style={{ position: 'relative', display: "flex" }}>
+                          <input title="width of bar type visualization" type="number" value={barDimensionsFormValues.WIDTH} onChange={(e) => setBarDimensionsFormValues(dim => { return { ...dim, WIDTH: e.target.value } })} />
+                          <input title="height of bar type visualization" type="number" value={barDimensionsFormValues.HEIGHT} onChange={(e) => setBarDimensionsFormValues(dim => { return { ...dim, HEIGHT: e.target.value } })} />
+                          <input type="button" onClick={updateBarVisualization} value="Set" />
+                        </div>
+                      </td>
+                    </tr> */}
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <legend>Virtualization as Line Graph</legend>
+                <table>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <label htmlFor="line-control">Show Controls
+                          <input type="checkbox" onChange={(e) => setLineControlsVisible(e.target.checked)} id="line-control" checked={lineControlsVisible} />
+                        </label>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div style={{ position: 'relative' }} title="height is halved">
+                          {
+                            lineVisualizationUpdating ?
+                              null :
+                              <Tarang.Line
+                                width={lineDimensions.WIDTH}
+                                height={100}
+                                controls={lineControlsVisible}
+                                audioUrl={srcArray[src].audioUrl}
+                                coverArtUrl={srcArray[src].coverArtUrl}
+                              />
+                          }
+                        </div>
+                      </td>
+                    </tr>
+                    {/* <tr>
+                      <td>
+                        <div style={{ position: 'relative', display: "flex" }}>
+                          <input title="width of line type visualization" type="number" value={lineDimensionsFormValues.WIDTH} onChange={(e) => setLineDimensionsFormValues(dim => { return { ...dim, WIDTH: e.target.value } })} />
+                          <input title="height of line type visualization" type="number" value={lineDimensionsFormValues.HEIGHT} onChange={(e) => setLineDimensionsFormValues(dim => { return { ...dim, HEIGHT: e.target.value } })} />
+                          <input type="button" onClick={updateLineVisualization} value="Set" />
+                        </div>
+                      </td>
+                    </tr> */}
+                  </tbody>
+                </table>
+              </td>
+              <td>
+                <legend>Virtualization as Bar Graph</legend>
+                <table>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <label htmlFor="bar-control">Show Controls
+                          <input type="checkbox" onChange={(e) => setBarControlsVisible(e.target.checked)} id="bar-control" checked={barControlsVisible} />
+                        </label>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div style={{ position: 'relative' }}>
+                          {
+                            barVisualizationUpdating ?
+                              null :
+                              <Tarang.Bar
+                                width={barDimensions.WIDTH}
+                                height={100}
+                                controls={barControlsVisible}
+                                audioUrl={srcArray[src].audioUrl}
+                                coverArtUrl={srcArray[src].coverArtUrl}
+                              />
+                          }
+                        </div>
+                      </td>
+                    </tr>
+                    {/* <tr>
+                      <td>
+                        <div style={{ position: 'relative', display: "flex" }}>
+                          <input title="width of bar type visualization" type="number" value={barDimensionsFormValues.WIDTH} onChange={(e) => setBarDimensionsFormValues(dim => { return { ...dim, WIDTH: e.target.value } })} />
+                          <input title="height of bar type visualization" type="number" value={barDimensionsFormValues.HEIGHT} onChange={(e) => setBarDimensionsFormValues(dim => { return { ...dim, HEIGHT: e.target.value } })} />
+                          <input type="button" onClick={updateBarVisualization} value="Set" />
+                        </div>
+                      </td>
+                    </tr> */}
                   </tbody>
                 </table>
               </td>
