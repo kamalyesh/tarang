@@ -29,6 +29,7 @@ class Example extends Component {
   render() {
     return <Tarang.Bar
         width={500}
+        height={200}
         controls={true}
         audioUrl={"url-of-mp3-file"}
       />
@@ -47,6 +48,7 @@ class Example extends Component {
   render() {
     return <Tarang.Line
         width={500}
+        height={200}
         controls={true}
         audioUrl={"url-of-mp3-file"}
       />
