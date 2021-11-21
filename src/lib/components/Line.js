@@ -6,7 +6,7 @@ import * as d3 from 'd3'
 import idman from 'idman';
 const { getNextId } = idman;
 
-export default function Line({ audioUrl, coverArtUrl, width, height, controls = false }) {
+export default function Line({ audioUrl, coverArtUrl, width, height, controls = false, muted = false, volume = 0.8 }) {
     // TODO: add state loaded. to check that the user has interacted with the page. so that the autoplay functionality can also be added in future
     const [isPlaying, setIsPlaying] = useState(false)
     const [canvasId, setCanvasId] = useState(getNextId())
@@ -54,6 +54,17 @@ export default function Line({ audioUrl, coverArtUrl, width, height, controls = 
             }
         }
     }, [height])
+
+    useEffect(() => {
+        if (audioSrcRef.current && audioContextRef.current) {
+            if (!muted) audioSrcRef.current.connect(audioContextRef.current.destination);
+            else audioSrcRef.current.disconnect(audioContextRef.current.destination);
+        }
+    }, [muted])
+
+    useEffect(() => {
+        audioRef.current.volume = volume
+    }, [volume])
 
     const clearSvg = () => {
         if (svgRef.current) svgRef.current.selectAll("*").remove()
@@ -138,18 +149,20 @@ export default function Line({ audioUrl, coverArtUrl, width, height, controls = 
             if (!audioContextRef.current) audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)()
             let audio = new Audio(audioUrl)
             audio.crossOrigin = "anonymous"
+
             if (!audioSrcRef.current) audioSrcRef.current = audioContextRef.current.createMediaElementSource(audio)
             else audioRef.current = audio
 
             audioRef.current = audioSrcRef.current.mediaElement
 
+            audioRef.current.volume = volume
             audioRef.current.load()
             audioRef.current.play()
             audioRef.current.onended = (event) => clearSvg()
             analyserRef.current = audioContextRef.current.createAnalyser()
 
             audioSrcRef.current.connect(analyserRef.current);
-            audioSrcRef.current.connect(audioContextRef.current.destination);
+            if (!muted) audioSrcRef.current.connect(audioContextRef.current.destination);
 
             analyserRef.current.fftSize = dimensions.WIDTH;
             const bufferLength = analyserRef.current.frequencyBinCount;

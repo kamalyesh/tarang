@@ -31,6 +31,8 @@ class Example extends Component {
         width={500}
         height={200}
         controls={true}
+        muted={false}
+        volume={0.8}
         audioUrl={"url-of-mp3-file"}
       />
   }
@@ -50,6 +52,8 @@ class Example extends Component {
         width={500}
         height={200}
         controls={true}
+        muted={false}
+        volume={0.8}
         audioUrl={"url-of-mp3-file"}
       />
   }

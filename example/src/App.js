@@ -18,6 +18,8 @@ const App = () => {
   const [newUrl, setNewUrl] = useState('')
   const [lineControlsVisible, setLineControlsVisible] = useState(true)
   const [barControlsVisible, setBarControlsVisible] = useState(true)
+  const [lineAudioMuted, setLineAudioMuted] = useState(true)
+  const [barAudioMuted, setBarAudioMuted] = useState(true)
   // const [lineDimensionsFormValues, setLineDimensionsFormValues] = useState(Tarang.DEFAULT_DIMENSIONS)
   // const [barDimensionsFormValues, setBarDimensionsFormValues] = useState(Tarang.DEFAULT_DIMENSIONS)
   const [lineDimensions, setLineDimensions] = useState(Tarang.DEFAULT_DIMENSIONS)
@@ -248,6 +250,96 @@ const App = () => {
                               <Tarang.Bar
                                 width={barDimensions.WIDTH}
                                 height={100}
+                                controls={barControlsVisible}
+                                audioUrl={srcArray[src].audioUrl}
+                                coverArtUrl={srcArray[src].coverArtUrl}
+                              />
+                          }
+                        </div>
+                      </td>
+                    </tr>
+                    {/* <tr>
+                      <td>
+                        <div style={{ position: 'relative', display: "flex" }}>
+                          <input title="width of bar type visualization" type="number" value={barDimensionsFormValues.WIDTH} onChange={(e) => setBarDimensionsFormValues(dim => { return { ...dim, WIDTH: e.target.value } })} />
+                          <input title="height of bar type visualization" type="number" value={barDimensionsFormValues.HEIGHT} onChange={(e) => setBarDimensionsFormValues(dim => { return { ...dim, HEIGHT: e.target.value } })} />
+                          <input type="button" onClick={updateBarVisualization} value="Set" />
+                        </div>
+                      </td>
+                    </tr> */}
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <legend>Virtualization as Line Graph (muted) </legend>
+                <table>
+                  <tbody>
+                    <tr>
+                      <td style={{display: "flex"}}>
+                        <label htmlFor="line-control">Show Controls
+                          <input type="checkbox" onChange={(e) => setLineControlsVisible(e.target.checked)} id="line-control" checked={lineControlsVisible} />
+                        </label>
+                        <label htmlFor="bar-control">Mute Audio
+                          <input type="checkbox" onChange={(e) => setLineAudioMuted(e.target.checked)} id="line-mute" checked={lineAudioMuted} />
+                        </label>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div style={{ position: 'relative' }} title="height is halved">
+                          {
+                            lineVisualizationUpdating ?
+                              null :
+                              <Tarang.Line
+                                width={lineDimensions.WIDTH}
+                                height={100}
+                                muted={lineAudioMuted}
+                                controls={lineControlsVisible}
+                                audioUrl={srcArray[src].audioUrl}
+                                coverArtUrl={srcArray[src].coverArtUrl}
+                              />
+                          }
+                        </div>
+                      </td>
+                    </tr>
+                    {/* <tr>
+                      <td>
+                        <div style={{ position: 'relative', display: "flex" }}>
+                          <input title="width of line type visualization" type="number" value={lineDimensionsFormValues.WIDTH} onChange={(e) => setLineDimensionsFormValues(dim => { return { ...dim, WIDTH: e.target.value } })} />
+                          <input title="height of line type visualization" type="number" value={lineDimensionsFormValues.HEIGHT} onChange={(e) => setLineDimensionsFormValues(dim => { return { ...dim, HEIGHT: e.target.value } })} />
+                          <input type="button" onClick={updateLineVisualization} value="Set" />
+                        </div>
+                      </td>
+                    </tr> */}
+                  </tbody>
+                </table>
+              </td>
+              <td>
+                <legend>Virtualization as Bar Graph (muted) </legend>
+                <table>
+                  <tbody>
+                    <tr>
+                      <td style={{display: "flex"}}>
+                        <label htmlFor="bar-control">Show Controls
+                          <input type="checkbox" onChange={(e) => setBarControlsVisible(e.target.checked)} id="bar-control" checked={barControlsVisible} />
+                        </label>
+                        <label htmlFor="bar-control">Mute Audio
+                          <input type="checkbox" onChange={(e) => setBarAudioMuted(e.target.checked)} id="bar-mute" checked={barAudioMuted} />
+                        </label>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div style={{ position: 'relative' }}>
+                          {
+                            barVisualizationUpdating ?
+                              null :
+                              <Tarang.Bar
+                                width={barDimensions.WIDTH}
+                                height={100}
+                                muted={barAudioMuted}
                                 controls={barControlsVisible}
                                 audioUrl={srcArray[src].audioUrl}
                                 coverArtUrl={srcArray[src].coverArtUrl}
