@@ -1,17 +1,50 @@
 import React, { useEffect, useRef, useState, Fragment } from "react";
 import binaryFloor from "../utils/binaryFloor";
-import constants from "../constants";
+import constants from "../Constants";
 const initialDimensions = constants.DEFAULT_DIMENSIONS
-import * as d3 from 'd3'
 import idman from 'idman';
+import { SvgHandler } from "../SvgHandler";
 const { getNextId } = idman;
 
-export default function Line({ audioUrl, coverArtUrl, width, height, controls = false, muted = false, volume = 0.8 }) {
+class LineSvgHandler extends SvgHandler {
+    constructor(canvasId, dimensions, scale = 1) {
+        super(canvasId, dimensions, scale)
+    }
+    init(background) {
+        const { canvasId, customScale, dimensions, d3} = this
+        this.graph = d3.select('#' + canvasId)
+            .append('svg')
+            .attr('height', dimensions.HEIGHT)
+            .attr('width', dimensions.WIDTH)
+            .attr('class', 'my-1')
+            // .attr('style', `${background}`)
+            .attr('id', "line_" + canvasId + "_" + getNextId());
+    }
+    update(frequencies) {
+        const { dimensions, d3, graph, scale } = this
+        this.clear()
+        var lineFunc = d3.line()
+            .x(function (d, i) {
+                // return i * dimensions.WIDTH / frequencies.length;
+                return i * dimensions.WIDTH * scale.WIDTH / frequencies.length;
+            })
+            .y(function (d) {
+                return dimensions.HEIGHT - (d * scale.HEIGHT);
+            })
+        graph.append('path')
+            .attr('d', lineFunc(frequencies))
+            .attr('stroke', 'black')
+            .attr('fill', 'none')
+    }
+}
+
+export default function Line({ audioUrl, coverArtUrl, width, height, controls = false, muted = false, volume = 0.8, scale = 1 }) {
     // TODO: add state loaded. to check that the user has interacted with the page. so that the autoplay functionality can also be added in future
     const [isPlaying, setIsPlaying] = useState(false)
     const [canvasId, setCanvasId] = useState(getNextId())
     const [dimensions, setDimensions] = useState(initialDimensions)
     const [isControlsVisible, setIsControlsVisible] = useState(true)
+    const [isMute, muteAudio] = useState(true)
     const audioRef = useRef(new Audio())
     const audioContextRef = useRef(null)
     const audioSrcRef = useRef(null);
@@ -57,9 +90,13 @@ export default function Line({ audioUrl, coverArtUrl, width, height, controls = 
 
     useEffect(() => {
         if (audioSrcRef.current && audioContextRef.current) {
-            if (!muted) audioSrcRef.current.connect(audioContextRef.current.destination);
+            if (!isMute) audioSrcRef.current.connect(audioContextRef.current.destination);
             else audioSrcRef.current.disconnect(audioContextRef.current.destination);
         }
+    }, [isMute])
+
+    useEffect(() => {
+        muteAudio(muted)
     }, [muted])
 
     useEffect(() => {
@@ -67,16 +104,10 @@ export default function Line({ audioUrl, coverArtUrl, width, height, controls = 
     }, [volume])
 
     const clearSvg = () => {
-        if (svgRef.current) svgRef.current.selectAll("*").remove()
+        if (svgRef.current) svgRef.current.clear()
         // console.log("clearing svg")
     }
 
-    const getSvgHeightScale = () => {
-        let assumedHeight = parseInt(dimensions.WIDTH * 0.5)
-        let ratio = Math.abs(dimensions.HEIGHT - assumedHeight) / assumedHeight
-        // console.log({ assumedHeight }, { ratio })
-        return ratio
-    }
     // const getSvgHeight = () => {
     //     let ratio = getSvgHeightScale()
     //     let newHeight = dimensions.HEIGHT * ratio
@@ -85,22 +116,10 @@ export default function Line({ audioUrl, coverArtUrl, width, height, controls = 
     // }
 
 
-    const updateSvg = (frequencies, height = dimensions.HEIGHT, width = dimensions.WIDTH) => {
-        let _scale = getSvgHeightScale()
+    const updateSvg = (frequencies) => {
         analyserRef.current.getByteFrequencyData(frequencies);
         if (svgRef.current && frequencies.length) {
-            clearSvg()
-            var lineFunc = d3.line()
-                .x(function (d, i) {
-                    return i * (width / frequencies.length);
-                })
-                .y(function (d) {
-                    return height - (d * _scale);
-                })
-            svgRef.current.append('path')
-                .attr('d', lineFunc(frequencies))
-                .attr('stroke', 'black')
-                .attr('fill', 'none')
+            svgRef.current.update(frequencies)
         }
     }
     useEffect(() => {
@@ -110,36 +129,28 @@ export default function Line({ audioUrl, coverArtUrl, width, height, controls = 
         }
     }, [coverArtUrl])
 
-    const createSvg = (frequencies, height = dimensions.HEIGHT, width = dimensions.WIDTH) => {
-        if (!d3) console.warn("d3 is not found. Tarang may not behave as expected.")
-        else {
-            // console.log("creating visualization graph ", { d3 })
-            let background = coverArtUrl ? `background: liniear-gradient(to bottom, rgba(245, 246, 252, 0.52), rgba(117, 118, 124, 0.78), url(${coverArtUrl}));` : 'background: liniear-gradient(to bottom, rgba(245, 246, 252, 0.26), rgba(117, 118, 124, 0.39))'
-            if (!svgRef.current) {
-                svgRef.current = d3.select('#' + canvasId)
-                    .append('svg')
-                    .attr('height', height)
-                    .attr('width', width)
-                    .attr('class', 'my-1')
-                    .attr('style', `${background}`)
-                    .attr('id', "line_" + canvasId + "_" + getNextId());
-            }
-
-            const updateFrequencyData = () => {
-                try {
-                    if (!audioRef.current || audioRef.current.paused) {
-                        cancelAnimationFrame(updateFrequencyData)
-                        // return;
-                    } else {
-                        requestAnimationFrame(updateFrequencyData)
-                        updateSvg(frequencies)
-                    }
-                } catch (error) {
-                    console.error(error)
-                }
-            }
-            updateFrequencyData()
+    const createSvg = (frequencies) => {
+        // console.log("creating visualization graph ", { d3 })
+        let background = coverArtUrl ? `background: liniear-gradient(to bottom, rgba(245, 246, 252, 0.52), rgba(117, 118, 124, 0.78), url(${coverArtUrl}));` : 'background: liniear-gradient(to bottom, rgba(245, 246, 252, 0.26), rgba(117, 118, 124, 0.39))'
+        if (!svgRef.current) {
+            svgRef.current = new LineSvgHandler(canvasId, dimensions, scale)
+            svgRef.current.init()
         }
+
+        const updateFrequencyData = () => {
+            try {
+                if (!audioRef.current || audioRef.current.paused) {
+                    cancelAnimationFrame(updateFrequencyData)
+                    // return;
+                } else {
+                    requestAnimationFrame(updateFrequencyData)
+                    updateSvg(frequencies)
+                }
+            } catch (error) {
+                console.error(error)
+            }
+        }
+        updateFrequencyData()
     }
 
     // useEffect(updateSvg, [frequencyData])
@@ -162,7 +173,7 @@ export default function Line({ audioUrl, coverArtUrl, width, height, controls = 
             analyserRef.current = audioContextRef.current.createAnalyser()
 
             audioSrcRef.current.connect(analyserRef.current);
-            if (!muted) audioSrcRef.current.connect(audioContextRef.current.destination);
+            if (!isMute) audioSrcRef.current.connect(audioContextRef.current.destination);
 
             analyserRef.current.fftSize = dimensions.WIDTH;
             const bufferLength = analyserRef.current.frequencyBinCount;
@@ -180,6 +191,10 @@ export default function Line({ audioUrl, coverArtUrl, width, height, controls = 
         audioRef.current.pause()
         audioRef.current.currentTime = 0
         clearSvg()
+    }
+
+    const toggleMute = () => {
+        muteAudio(!isMute)
     }
 
     const focusIn = () => {
@@ -216,7 +231,7 @@ export default function Line({ audioUrl, coverArtUrl, width, height, controls = 
             onBlur={focusOut}
             onPointerLeave={focusIn}
 
-            style={{ top: 0, left: 0, width: dimensions.WIDTH, height: isControlsVisible ? (dimensions.HEIGHT + dimensions.CONTROLS_HEIGHT) : dimensions.HEIGHT, position: "relative", backgroundColor: "#eeeeeeaa" }}>
+            style={{ top: 0, left: 0, width: (dimensions.WIDTH), height: isControlsVisible ? ((dimensions.HEIGHT) + dimensions.CONTROLS_HEIGHT) : dimensions.HEIGHT * scale.HEIGHT, position: "relative", backgroundColor: "#eeeeeeaa" }}>
             <div id={canvasId} style={{ "flex": 1, position: "absolute", top: 0, bottom: 0, left: 0, right: 0, overflow: 'hidden' }}>
             </div>
             {
@@ -224,6 +239,7 @@ export default function Line({ audioUrl, coverArtUrl, width, height, controls = 
                     <div style={{ "flex": 1, position: "absolute", height: dimensions.CONTROLS_HEIGHT, bottom: 0, left: 0, right: 0 }} >
                         <button onClick={play}>Play</button>
                         <button onClick={stop}>Stop</button>
+                        <button onClick={toggleMute}>{isMute ? "Unmute" : "Mute"}</button>
                     </div> : <>
                     </>
             }

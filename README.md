@@ -30,6 +30,7 @@ class Example extends Component {
     return <Tarang.Bar
         width={500}
         height={200}
+        scale={1}
         controls={true}
         muted={false}
         volume={0.8}
@@ -51,6 +52,7 @@ class Example extends Component {
     return <Tarang.Line
         width={500}
         height={200}
+        scale={1}
         controls={true}
         muted={false}
         volume={0.8}
@@ -59,6 +61,10 @@ class Example extends Component {
   }
 }
 ```
+
+### Note:
+
+make sure that the width is of power of two (e.g., 2, 4, 8, etc)
 
 ## License
 

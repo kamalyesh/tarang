@@ -1,23 +1,64 @@
 import React, { useEffect, useRef, useState, Fragment } from "react";
 import binaryFloor from "../utils/binaryFloor";
-import constants from "../constants";
+import constants from "../Constants";
 const initialDimensions = constants.DEFAULT_DIMENSIONS
-import * as d3 from 'd3'
 import idman from 'idman';
+import { SvgHandler } from "../SvgHandler";
 const { getNextId } = idman;
 
-export default function Bar({ audioUrl, coverArtUrl, width, height, controls = false, muted = false, volume = 0.8 }) {
+class BarSvgHandler extends SvgHandler {
+    constructor(canvasId, dimensions, scale = 1) {
+        super(canvasId, dimensions, scale)
+        this.BAR_PADDING = 1
+    }
+    init(style) {
+        const { canvasId, customScale, dimensions, d3 } = this
+        this.graph = d3.select('#' + canvasId)
+            .append('svg')
+            .attr('height', dimensions.HEIGHT)
+            .attr('width', dimensions.WIDTH)
+            .attr('class', 'my-1')
+            // .attr('style', style)
+            .attr('id', "bar_" + canvasId + "_" + getNextId());
+    }
+    update(frequencies) {
+        const { BAR_PADDING, dimensions, graph, scale } = this
+        graph.selectAll('rect')
+            .data(frequencies)
+            .enter()
+            .append('rect')
+            .attr('fill', function (d) {
+                return "#000"
+            })
+            .attr('width', dimensions.WIDTH / frequencies.length - BAR_PADDING)
+            .attr('x', function (d, i) {
+                return i * ((dimensions.WIDTH * scale.WIDTH) / frequencies.length);
+                // return i * (dimensions.WIDTH / frequencies.length);
+            })
+        graph.selectAll('rect')
+            .data(frequencies)
+            .attr('y', function (d, i) {
+                return dimensions.HEIGHT - (d * scale.HEIGHT)
+            })
+            .attr('height', function (d, i) {
+                return (d * scale.HEIGHT)
+            });
+    }
+}
+
+
+export default function Bar({ audioUrl, coverArtUrl, width, height, controls = false, muted = false, volume = 0.8, scale = 1 }) {
     // TODO: add state loaded. to check that the user has interacted with the page. so that the autoplay functionality can also be added in future
     const [isPlaying, setIsPlaying] = useState(false)
     const [canvasId, setCanvasId] = useState(getNextId())
     const [dimensions, setDimensions] = useState(initialDimensions)
+    const [isMute, muteAudio] = useState(false)
     const [isControlsVisible, setIsControlsVisible] = useState(true)
     const audioRef = useRef(new Audio())
     const audioContextRef = useRef(null)
     const audioSrcRef = useRef(null);
     const analyserRef = useRef(null);
     const svgRef = useRef(null);
-    const BAR_PADDING = 1
 
     useEffect(() => {
         setIsControlsVisible(controls)
@@ -29,7 +70,8 @@ export default function Bar({ audioUrl, coverArtUrl, width, height, controls = f
             setDimensions(newDimensions => {
                 return {
                     ...newDimensions,
-                    WIDTH: binaryFloor(width)
+                    // WIDTH: binaryFloor(width)
+                    WIDTH: width
                 }
             });
         }
@@ -58,9 +100,13 @@ export default function Bar({ audioUrl, coverArtUrl, width, height, controls = f
 
     useEffect(() => {
         if (audioSrcRef.current && audioContextRef.current) {
-            if (!muted) audioSrcRef.current.connect(audioContextRef.current.destination);
+            if (!isMute) audioSrcRef.current.connect(audioContextRef.current.destination);
             else audioSrcRef.current.disconnect(audioContextRef.current.destination);
         }
+    }, [isMute])
+
+    useEffect(() => {
+        muteAudio(muted)
     }, [muted])
 
     useEffect(() => {
@@ -68,16 +114,10 @@ export default function Bar({ audioUrl, coverArtUrl, width, height, controls = f
     }, [volume])
 
     const clearSvg = () => {
-        if (svgRef.current) svgRef.current.selectAll("*").remove()
+        if (svgRef.current) svgRef.current.clear()
         // console.log("clearing svg")
     }
 
-    const getSvgHeightScale = () => {
-        let assumedHeight = parseInt(dimensions.WIDTH * 0.5)
-        let ratio = Math.abs(dimensions.HEIGHT - assumedHeight) / assumedHeight
-        // console.log({ assumedHeight }, { ratio })
-        return ratio
-    }
     // const getSvgHeight = () => {
     //     let ratio = getSvgHeightScale()
     //     let newHeight = dimensions.HEIGHT * ratio
@@ -85,69 +125,46 @@ export default function Bar({ audioUrl, coverArtUrl, width, height, controls = f
     //     return newHeight        
     // }
 
-    const updateSvg = (frequencies, height = dimensions.HEIGHT, width = dimensions.WIDTH) => {
+    const updateSvg = (frequencies) => {
         analyserRef.current.getByteFrequencyData(frequencies);
         if (svgRef.current && frequencies.length) {
-            let _scale = getSvgHeightScale()
-            svgRef.current.selectAll('rect')
-                .data(frequencies)
-                .enter()
-                .append('rect')
-                .attr('fill', function (d) {
-                    return "#000"
-                })
-                .attr('width', width / frequencies.length - BAR_PADDING)
-                .attr('x', function (d, i) {
-                    return i * (width / frequencies.length);
-                })
-            svgRef.current.selectAll('rect')
-                .data(frequencies)
-                .attr('y', function (d, i) {
-                    return height - (d * _scale)
-                })
-                .attr('height', function (d, i) {
-                    return (d * _scale)
-                });
+            svgRef.current.update(frequencies)
         }
     }
+
     useEffect(() => {
         if (svgRef.current) {
             let newStyle = coverArtUrl ? `background: liniear-gradient(to bottom, rgba(245, 246, 252, 0.52), rgba(117, 118, 124, 0.78), url(${coverArtUrl}));` : 'background: liniear-gradient(to bottom, rgba(245, 246, 252, 0.26), rgba(117, 118, 124, 0.39))'
             console.log('changing style', newStyle)
-            svgRef.current.select('#' + canvasId)
-                .attr('style', newStyle)
+            svgRef.current.clear()
+            svgRef.current.init(newStyle)
         }
     }, [coverArtUrl])
 
-    const createSvg = (frequencies, height = dimensions.HEIGHT, width = dimensions.WIDTH) => {
-        if (!d3) console.warn("d3 is not found. Tarang may not behave as expected.")
-        else {
-            // console.log("creating visualization graph ", { d3 })
-            if (!svgRef.current) {
-                svgRef.current = d3.select('#' + canvasId)
-                    .append('svg')
-                    .attr('height', height)
-                    .attr('width', width)
-                    .attr('class', 'my-1')
-                    .attr('style', coverArtUrl ? `background: liniear-gradient(to bottom, rgba(117, 118, 124, 0.52), rgba(53, 57, 64, 0.78), url(${coverArtUrl}));` : 'background: liniear-gradient(to bottom, rgba(245, 246, 252, 0.26), rgba(117, 118, 124, 0.39))')
-                    .attr('id', "bar_" + canvasId + "_" + getNextId());
-            }
-
-            const updateFrequencyData = () => {
-                try {
-                    if (!audioRef.current || audioRef.current.paused) {
-                        cancelAnimationFrame(updateFrequencyData)
-                        // return;
-                    } else {
-                        requestAnimationFrame(updateFrequencyData)
-                        updateSvg(frequencies)
-                    }
-                } catch (error) {
-                    console.error(error)
-                }
-            }
-            updateFrequencyData()
+    const createSvg = (frequencies) => {
+        // console.log("creating visualization graph ", { d3 })
+        if (!svgRef.current) {
+            svgRef.current = new BarSvgHandler(canvasId, dimensions, scale)
+            // let newStyle = coverArtUrl ? `background: liniear-gradient(to bottom, rgba(117, 118, 124, 0.52), rgba(53, 57, 64, 0.78), url(${coverArtUrl}));` : 'background: liniear-gradient(to bottom, rgba(245, 246, 252, 0.26), rgba(117, 118, 124, 0.39))'
+            // svgRef.current.init(newStyle)
+            svgRef.current.init()
         }
+
+        const updateFrequencyData = () => {
+            try {
+                if (!audioRef.current || audioRef.current.paused) {
+                    cancelAnimationFrame(updateFrequencyData)
+                    // return;
+                } else {
+                    requestAnimationFrame(updateFrequencyData)
+                    updateSvg(frequencies)
+                }
+            } catch (error) {
+                console.error(error)
+            }
+        }
+        updateFrequencyData()
+
     }
 
     // useEffect(updateSvg, [frequencyData])
@@ -169,7 +186,7 @@ export default function Bar({ audioUrl, coverArtUrl, width, height, controls = f
             analyserRef.current = audioContextRef.current.createAnalyser()
 
             audioSrcRef.current.connect(analyserRef.current);
-            if (!muted) audioSrcRef.current.connect(audioContextRef.current.destination);
+            if (!isMute) audioSrcRef.current.connect(audioContextRef.current.destination);
 
             analyserRef.current.fftSize = dimensions.WIDTH;
             const bufferLength = analyserRef.current.frequencyBinCount;
@@ -187,6 +204,10 @@ export default function Bar({ audioUrl, coverArtUrl, width, height, controls = f
         audioRef.current.pause()
         audioRef.current.currentTime = 0
         clearSvg()
+    }
+
+    const toggleMute = () => {
+        muteAudio(!isMute)
     }
 
     const focusIn = () => {
@@ -231,6 +252,7 @@ export default function Bar({ audioUrl, coverArtUrl, width, height, controls = f
                     <div style={{ "flex": 1, position: "absolute", height: dimensions.CONTROLS_HEIGHT, bottom: 0, left: 0, right: 0 }} >
                         <button onClick={play}>Play</button>
                         <button onClick={stop}>Stop</button>
+                        <button onClick={toggleMute}>{isMute ? "Unmute" : "Mute"}</button>
                     </div> : <>
                     </>
             }

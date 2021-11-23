@@ -18,8 +18,6 @@ const App = () => {
   const [newUrl, setNewUrl] = useState('')
   const [lineControlsVisible, setLineControlsVisible] = useState(true)
   const [barControlsVisible, setBarControlsVisible] = useState(true)
-  const [lineAudioMuted, setLineAudioMuted] = useState(true)
-  const [barAudioMuted, setBarAudioMuted] = useState(true)
   // const [lineDimensionsFormValues, setLineDimensionsFormValues] = useState(Tarang.DEFAULT_DIMENSIONS)
   // const [barDimensionsFormValues, setBarDimensionsFormValues] = useState(Tarang.DEFAULT_DIMENSIONS)
   const [lineDimensions, setLineDimensions] = useState(Tarang.DEFAULT_DIMENSIONS)
@@ -121,7 +119,14 @@ const App = () => {
                     </tr>
                     <tr>
                       <td>
-                        <div style={{ position: 'relative' }}>
+                        <div style={{ position: 'relative' }}
+                          title={JSON.stringify({
+                            width: lineDimensions.WIDTH,
+                            height: lineDimensions.HEIGHT,
+                            controls: lineControlsVisible,
+                            audioUrl: srcArray[src].audioUrl,
+                            // coverArtUrl: srcArray[src].coverArtUrl,
+                          }, null, 4)}>
                           {
                             lineVisualizationUpdating ?
                               null :
@@ -130,7 +135,7 @@ const App = () => {
                                 height={lineDimensions.HEIGHT}
                                 controls={lineControlsVisible}
                                 audioUrl={srcArray[src].audioUrl}
-                                coverArtUrl={srcArray[src].coverArtUrl}
+                                // coverArtUrl={srcArray[src].coverArtUrl}
                               />
                           }
                         </div>
@@ -161,7 +166,14 @@ const App = () => {
                     </tr>
                     <tr>
                       <td>
-                        <div style={{ position: 'relative' }}>
+                        <div style={{ position: 'relative' }}
+                          title={JSON.stringify({
+                            width: barDimensions.WIDTH,
+                            height: barDimensions.HEIGHT,
+                            controls: barControlsVisible,
+                            audioUrl: srcArray[src].audioUrl,
+                            // coverArtUrl: srcArray[src].coverArtUrl,
+                          }, null, 4)}>
                           {
                             barVisualizationUpdating ?
                               null :
@@ -170,7 +182,7 @@ const App = () => {
                                 height={barDimensions.HEIGHT}
                                 controls={barControlsVisible}
                                 audioUrl={srcArray[src].audioUrl}
-                                coverArtUrl={srcArray[src].coverArtUrl}
+                                // coverArtUrl={srcArray[src].coverArtUrl}
                               />
                           }
                         </div>
@@ -191,7 +203,7 @@ const App = () => {
             </tr>
             <tr>
               <td>
-                <legend>Virtualization as Line Graph</legend>
+                <legend>Virtualization as Line Graph (halved)</legend>
                 <table>
                   <tbody>
                     <tr>
@@ -203,16 +215,25 @@ const App = () => {
                     </tr>
                     <tr>
                       <td>
-                        <div style={{ position: 'relative' }} title="height is halved">
+                        <div style={{ position: 'relative' }} title={
+                          JSON.stringify({
+                            width: lineDimensions.WIDTH,
+                            height: lineDimensions.HEIGHT / 2,
+                            controls: lineControlsVisible,
+                            audioUrl: srcArray[src].audioUrl,
+                            // coverArtUrl: srcArray[src].coverArtUrl,
+                            scale: 0.5,
+                          }, null, 4)}>
                           {
                             lineVisualizationUpdating ?
                               null :
                               <Tarang.Line
                                 width={lineDimensions.WIDTH}
-                                height={100}
+                                height={lineDimensions.HEIGHT / 2}
                                 controls={lineControlsVisible}
                                 audioUrl={srcArray[src].audioUrl}
-                                coverArtUrl={srcArray[src].coverArtUrl}
+                                // coverArtUrl={srcArray[src].coverArtUrl}
+                                scale={0.5}
                               />
                           }
                         </div>
@@ -231,7 +252,7 @@ const App = () => {
                 </table>
               </td>
               <td>
-                <legend>Virtualization as Bar Graph</legend>
+                <legend>Virtualization as Bar Graph (halved)</legend>
                 <table>
                   <tbody>
                     <tr>
@@ -243,16 +264,24 @@ const App = () => {
                     </tr>
                     <tr>
                       <td>
-                        <div style={{ position: 'relative' }}>
+                        <div style={{ position: 'relative' }} title={JSON.stringify({
+                          width: barDimensions.WIDTH,
+                          height: barDimensions.HEIGHT / 2,
+                          controls: barControlsVisible,
+                          audioUrl: srcArray[src].audioUrl,
+                          // coverArtUrl: srcArray[src].coverArtUrl,
+                          scale: 0.9
+                        }, null, 4)}>
                           {
                             barVisualizationUpdating ?
                               null :
                               <Tarang.Bar
                                 width={barDimensions.WIDTH}
-                                height={100}
+                                height={barDimensions.HEIGHT / 2}
                                 controls={barControlsVisible}
                                 audioUrl={srcArray[src].audioUrl}
-                                coverArtUrl={srcArray[src].coverArtUrl}
+                                // coverArtUrl={srcArray[src].coverArtUrl}
+                                scale={0.9}
                               />
                           }
                         </div>
@@ -273,32 +302,36 @@ const App = () => {
             </tr>
             <tr>
               <td>
-                <legend>Virtualization as Line Graph (muted) </legend>
+                <legend>Virtualization as Line Graph (scaled)</legend>
                 <table>
                   <tbody>
                     <tr>
-                      <td style={{display: "flex"}}>
+                      <td>
                         <label htmlFor="line-control">Show Controls
                           <input type="checkbox" onChange={(e) => setLineControlsVisible(e.target.checked)} id="line-control" checked={lineControlsVisible} />
-                        </label>
-                        <label htmlFor="bar-control">Mute Audio
-                          <input type="checkbox" onChange={(e) => setLineAudioMuted(e.target.checked)} id="line-mute" checked={lineAudioMuted} />
                         </label>
                       </td>
                     </tr>
                     <tr>
                       <td>
-                        <div style={{ position: 'relative' }} title="height is halved">
+                        <div
+                          style={{ position: 'relative' }}
+                          title={JSON.stringify({
+                            width: lineDimensions.WIDTH,
+                            controls: lineControlsVisible,
+                            audioUrl: srcArray[src].audioUrl,
+                            // coverArtUrl: srcArray[src].coverArtUrl,
+                            scale: 1.1,
+                          }, null, 4)}>
                           {
                             lineVisualizationUpdating ?
                               null :
                               <Tarang.Line
                                 width={lineDimensions.WIDTH}
-                                height={100}
-                                muted={lineAudioMuted}
                                 controls={lineControlsVisible}
                                 audioUrl={srcArray[src].audioUrl}
-                                coverArtUrl={srcArray[src].coverArtUrl}
+                                // coverArtUrl={srcArray[src].coverArtUrl}
+                                scale={1.1}
                               />
                           }
                         </div>
@@ -317,32 +350,36 @@ const App = () => {
                 </table>
               </td>
               <td>
-                <legend>Virtualization as Bar Graph (muted) </legend>
+                <legend>Virtualization as Bar Graph (scaled)</legend>
                 <table>
                   <tbody>
                     <tr>
-                      <td style={{display: "flex"}}>
+                      <td>
                         <label htmlFor="bar-control">Show Controls
                           <input type="checkbox" onChange={(e) => setBarControlsVisible(e.target.checked)} id="bar-control" checked={barControlsVisible} />
-                        </label>
-                        <label htmlFor="bar-control">Mute Audio
-                          <input type="checkbox" onChange={(e) => setBarAudioMuted(e.target.checked)} id="bar-mute" checked={barAudioMuted} />
                         </label>
                       </td>
                     </tr>
                     <tr>
                       <td>
-                        <div style={{ position: 'relative' }}>
+                        <div
+                          style={{ position: 'relative' }}
+                          title={JSON.stringify({
+                            width: barDimensions.WIDTH,
+                            controls: barControlsVisible,
+                            audioUrl: srcArray[src].audioUrl,
+                            // coverArtUrl: srcArray[src].coverArtUrl,
+                            scale: 1.1,
+                          }, null, 4)}>
                           {
                             barVisualizationUpdating ?
                               null :
                               <Tarang.Bar
                                 width={barDimensions.WIDTH}
-                                height={100}
-                                muted={barAudioMuted}
                                 controls={barControlsVisible}
                                 audioUrl={srcArray[src].audioUrl}
-                                coverArtUrl={srcArray[src].coverArtUrl}
+                                // coverArtUrl={srcArray[src].coverArtUrl}
+                                scale={1.1}
                               />
                           }
                         </div>
