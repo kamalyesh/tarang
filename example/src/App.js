@@ -15,7 +15,8 @@ const App = () => {
   const DEFAULT_SRC = 0
   const [srcArray, updateSrcArray] = useState([...initialSrcArray])
   const [src, updateSrc] = useState(DEFAULT_SRC)
-  const [newUrl, setNewUrl] = useState('')
+  const [newAudioUrl, setNewAudioUrl] = useState('')
+  const [newCoverArtUrl, setNewCoverArtUrl] = useState('')
   const [lineControlsVisible, setLineControlsVisible] = useState(true)
   const [barControlsVisible, setBarControlsVisible] = useState(true)
   // const [lineDimensionsFormValues, setLineDimensionsFormValues] = useState(Tarang.DEFAULT_DIMENSIONS)
@@ -25,11 +26,11 @@ const App = () => {
   const [lineVisualizationUpdating, setLineVisualizationUpdating] = useState(false)
   const [barVisualizationUpdating, setBarVisualizationUpdating] = useState(false)
 
-  const reset = () => { updateSrcArray([initialSrcArray[0]]); updateSrc(DEFAULT_SRC); setNewUrl(''); }
+  const reset = () => { updateSrcArray([initialSrcArray[0]]); updateSrc(DEFAULT_SRC); setNewAudioUrl(''); setNewCoverArtUrl(''); }
   const setSrc = (index) => { updateSrc(index) }
-  const updateNewUrl = () => {
-    if (newUrl) {
-      updateSrcArray(srcArray.concat([{ audioUrl: newUrl, coverArtUrl: '#' }]))
+  const updateNewAudio = () => {
+    if (newAudioUrl) {
+      updateSrcArray(srcArray.concat([{ audioUrl: newAudioUrl, coverArtUrl: newCoverArtUrl || "#" }]))
     }
   }
 
@@ -55,7 +56,7 @@ const App = () => {
   // }
 
   return (
-    <div className="App">
+    <div className="App" style={{ backgroundColor: 'lightsteelblue' }}>
       <section>
         <table>
           <thead>
@@ -72,17 +73,13 @@ const App = () => {
                       </tr>) || null
                     }
                     <tr>
-                      <td>
-                        <input style={{ width: "90%" }} type="url" value={newUrl} onChange={(e) => setNewUrl(e.target.value)} placeholder="Enter mp3 url" />
+                      <td style={{ display: "flex", flexWrap: "wrap" }}>
+                        <input style={{ width: "90%", display: "block" }} type="url" value={newAudioUrl} onChange={(e) => setNewAudioUrl(e.target.value)} placeholder="Enter mp3 url" />
+                        <input style={{ width: "90%", display: "block" }} type="url" value={newCoverArtUrl} onChange={(e) => setNewCoverArtUrl(e.target.value)} placeholder="Enter cover art url" />
                       </td>
-                      <td>
-                        <button type="button" onClick={updateNewUrl}>Set</button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td></td>
-                      <td>
-                        <button onClick={reset}>Reset</button>
+                      <td style={{ display: "flex", flexWrap: "wrap" }}>
+                        <button type="button" onClick={updateNewAudio} style={{ display: "block" }}>Set</button>
+                        <button onClick={reset} style={{ display: "block" }}>Reset</button>
                       </td>
                     </tr>
                   </tbody>
@@ -125,7 +122,8 @@ const App = () => {
                             height: lineDimensions.HEIGHT,
                             controls: lineControlsVisible,
                             audioUrl: srcArray[src].audioUrl,
-                            // coverArtUrl: srcArray[src].coverArtUrl,
+                            coverArtUrl: srcArray[src].coverArtUrl,
+                            scale: 0.7,
                           }, null, 4)}>
                           {
                             lineVisualizationUpdating ?
@@ -135,7 +133,8 @@ const App = () => {
                                 height={lineDimensions.HEIGHT}
                                 controls={lineControlsVisible}
                                 audioUrl={srcArray[src].audioUrl}
-                                // coverArtUrl={srcArray[src].coverArtUrl}
+                                coverArtUrl={srcArray[src].coverArtUrl}
+                                scale={0.7}
                               />
                           }
                         </div>
@@ -172,7 +171,8 @@ const App = () => {
                             height: barDimensions.HEIGHT,
                             controls: barControlsVisible,
                             audioUrl: srcArray[src].audioUrl,
-                            // coverArtUrl: srcArray[src].coverArtUrl,
+                            coverArtUrl: srcArray[src].coverArtUrl,
+                            scale: 0.7,
                           }, null, 4)}>
                           {
                             barVisualizationUpdating ?
@@ -182,7 +182,8 @@ const App = () => {
                                 height={barDimensions.HEIGHT}
                                 controls={barControlsVisible}
                                 audioUrl={srcArray[src].audioUrl}
-                                // coverArtUrl={srcArray[src].coverArtUrl}
+                                coverArtUrl={srcArray[src].coverArtUrl}
+                                scale={0.7}
                               />
                           }
                         </div>
@@ -221,7 +222,7 @@ const App = () => {
                             height: lineDimensions.HEIGHT / 2,
                             controls: lineControlsVisible,
                             audioUrl: srcArray[src].audioUrl,
-                            // coverArtUrl: srcArray[src].coverArtUrl,
+                            coverArtUrl: srcArray[src].coverArtUrl,
                             scale: 0.5,
                           }, null, 4)}>
                           {
@@ -232,7 +233,7 @@ const App = () => {
                                 height={lineDimensions.HEIGHT / 2}
                                 controls={lineControlsVisible}
                                 audioUrl={srcArray[src].audioUrl}
-                                // coverArtUrl={srcArray[src].coverArtUrl}
+                                coverArtUrl={srcArray[src].coverArtUrl}
                                 scale={0.5}
                               />
                           }
@@ -269,7 +270,7 @@ const App = () => {
                           height: barDimensions.HEIGHT / 2,
                           controls: barControlsVisible,
                           audioUrl: srcArray[src].audioUrl,
-                          // coverArtUrl: srcArray[src].coverArtUrl,
+                          coverArtUrl: srcArray[src].coverArtUrl,
                           scale: 0.9
                         }, null, 4)}>
                           {
@@ -280,7 +281,7 @@ const App = () => {
                                 height={barDimensions.HEIGHT / 2}
                                 controls={barControlsVisible}
                                 audioUrl={srcArray[src].audioUrl}
-                                // coverArtUrl={srcArray[src].coverArtUrl}
+                                coverArtUrl={srcArray[src].coverArtUrl}
                                 scale={0.9}
                               />
                           }
@@ -320,7 +321,7 @@ const App = () => {
                             width: lineDimensions.WIDTH,
                             controls: lineControlsVisible,
                             audioUrl: srcArray[src].audioUrl,
-                            // coverArtUrl: srcArray[src].coverArtUrl,
+                            coverArtUrl: srcArray[src].coverArtUrl,
                             scale: 1.1,
                           }, null, 4)}>
                           {
@@ -330,7 +331,7 @@ const App = () => {
                                 width={lineDimensions.WIDTH}
                                 controls={lineControlsVisible}
                                 audioUrl={srcArray[src].audioUrl}
-                                // coverArtUrl={srcArray[src].coverArtUrl}
+                                coverArtUrl={srcArray[src].coverArtUrl}
                                 scale={1.1}
                               />
                           }
@@ -368,7 +369,7 @@ const App = () => {
                             width: barDimensions.WIDTH,
                             controls: barControlsVisible,
                             audioUrl: srcArray[src].audioUrl,
-                            // coverArtUrl: srcArray[src].coverArtUrl,
+                            coverArtUrl: srcArray[src].coverArtUrl,
                             scale: 1.1,
                           }, null, 4)}>
                           {
@@ -378,7 +379,7 @@ const App = () => {
                                 width={barDimensions.WIDTH}
                                 controls={barControlsVisible}
                                 audioUrl={srcArray[src].audioUrl}
-                                // coverArtUrl={srcArray[src].coverArtUrl}
+                                coverArtUrl={srcArray[src].coverArtUrl}
                                 scale={1.1}
                               />
                           }

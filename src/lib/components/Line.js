@@ -11,16 +11,16 @@ class LineSvgHandler extends SvgHandler {
         super(canvasId, dimensions, scale)
     }
     init(background) {
-        const { canvasId, customScale, dimensions, d3} = this
+        const { canvasId, customScale, dimensions, d3 } = this
         this.graph = d3.select('#' + canvasId)
             .append('svg')
             .attr('height', dimensions.HEIGHT)
             .attr('width', dimensions.WIDTH)
             .attr('class', 'my-1')
-            // .attr('style', `${background}`)
+            .attr('style', `${background}`)
             .attr('id', "line_" + canvasId + "_" + getNextId());
     }
-    update(frequencies) {
+    update(frequencies, opacity) {
         const { dimensions, d3, graph, scale } = this
         this.clear()
         var lineFunc = d3.line()
@@ -34,11 +34,12 @@ class LineSvgHandler extends SvgHandler {
         graph.append('path')
             .attr('d', lineFunc(frequencies))
             .attr('stroke', 'black')
+            // .attr('fill-opacity', opacity)
             .attr('fill', 'none')
     }
 }
 
-export default function Line({ audioUrl, coverArtUrl, width, height, controls = false, muted = false, volume = 0.8, scale = 1 }) {
+export default function Line({ audioUrl, coverArtUrl, width, height, controls = false, muted = false, volume = 0.8, scale = 1, opacity }) {
     // TODO: add state loaded. to check that the user has interacted with the page. so that the autoplay functionality can also be added in future
     const [isPlaying, setIsPlaying] = useState(false)
     const [canvasId, setCanvasId] = useState(getNextId())
@@ -119,19 +120,12 @@ export default function Line({ audioUrl, coverArtUrl, width, height, controls = 
     const updateSvg = (frequencies) => {
         analyserRef.current.getByteFrequencyData(frequencies);
         if (svgRef.current && frequencies.length) {
-            svgRef.current.update(frequencies)
+            svgRef.current.update(frequencies, opacity)
         }
     }
-    useEffect(() => {
-        if (svgRef.current) {
-            svgRef.current.select('#' + canvasId)
-                .attr('style', coverArtUrl ? `background: liniear-gradient(to bottom, rgba(245, 246, 252, 0.52), rgba(117, 118, 124, 0.78), url(${coverArtUrl}));` : 'background: liniear-gradient(to bottom, rgba(245, 246, 252, 0.26), rgba(117, 118, 124, 0.39))')
-        }
-    }, [coverArtUrl])
 
     const createSvg = (frequencies) => {
         // console.log("creating visualization graph ", { d3 })
-        let background = coverArtUrl ? `background: liniear-gradient(to bottom, rgba(245, 246, 252, 0.52), rgba(117, 118, 124, 0.78), url(${coverArtUrl}));` : 'background: liniear-gradient(to bottom, rgba(245, 246, 252, 0.26), rgba(117, 118, 124, 0.39))'
         if (!svgRef.current) {
             svgRef.current = new LineSvgHandler(canvasId, dimensions, scale)
             svgRef.current.init()
@@ -230,8 +224,14 @@ export default function Line({ audioUrl, coverArtUrl, width, height, controls = 
             onMouseLeave={focusOut}
             onBlur={focusOut}
             onPointerLeave={focusIn}
-
-            style={{ top: 0, left: 0, width: (dimensions.WIDTH), height: isControlsVisible ? ((dimensions.HEIGHT) + dimensions.CONTROLS_HEIGHT) : dimensions.HEIGHT * scale.HEIGHT, position: "relative", backgroundColor: "#eeeeeeaa" }}>
+            
+            className="tarang-line tarang-container"
+            style={{
+                width: (dimensions.WIDTH),
+                height: isControlsVisible ? ((dimensions.HEIGHT) + dimensions.CONTROLS_HEIGHT) : dimensions.HEIGHT * scale.HEIGHT,
+                background: `linear-gradient(to bottom, #aaa6, #aaad)`,
+                background: `linear-gradient(to bottom, #aaa6, #aaad), url(${coverArtUrl})`,
+            }}>
             <div id={canvasId} style={{ "flex": 1, position: "absolute", top: 0, bottom: 0, left: 0, right: 0, overflow: 'hidden' }}>
             </div>
             {

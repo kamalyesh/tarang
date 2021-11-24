@@ -35,6 +35,7 @@ class Example extends Component {
         muted={false}
         volume={0.8}
         audioUrl={"url-of-mp3-file"}
+        coverArtUrl={"url-of-cover-art-image-file"}
       />
   }
 }
@@ -57,6 +58,7 @@ class Example extends Component {
         muted={false}
         volume={0.8}
         audioUrl={"url-of-mp3-file"}
+        coverArtUrl={"url-of-cover-art-image-file"}
       />
   }
 }

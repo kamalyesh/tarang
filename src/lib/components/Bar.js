@@ -18,15 +18,18 @@ class BarSvgHandler extends SvgHandler {
             .attr('height', dimensions.HEIGHT)
             .attr('width', dimensions.WIDTH)
             .attr('class', 'my-1')
-            // .attr('style', style)
+            .attr('style', style)
             .attr('id', "bar_" + canvasId + "_" + getNextId());
     }
-    update(frequencies) {
+    update(frequencies, opacity = 1) {
         const { BAR_PADDING, dimensions, graph, scale } = this
         graph.selectAll('rect')
             .data(frequencies)
             .enter()
             .append('rect')
+            // .attr('fill-opacity', function (d) {
+            //     return opacity
+            // })
             .attr('fill', function (d) {
                 return "#000"
             })
@@ -47,7 +50,7 @@ class BarSvgHandler extends SvgHandler {
 }
 
 
-export default function Bar({ audioUrl, coverArtUrl, width, height, controls = false, muted = false, volume = 0.8, scale = 1 }) {
+export default function Bar({ audioUrl, coverArtUrl, width, height, controls = false, muted = false, volume = 0.8, scale = 1, opacity }) {
     // TODO: add state loaded. to check that the user has interacted with the page. so that the autoplay functionality can also be added in future
     const [isPlaying, setIsPlaying] = useState(false)
     const [canvasId, setCanvasId] = useState(getNextId())
@@ -128,25 +131,14 @@ export default function Bar({ audioUrl, coverArtUrl, width, height, controls = f
     const updateSvg = (frequencies) => {
         analyserRef.current.getByteFrequencyData(frequencies);
         if (svgRef.current && frequencies.length) {
-            svgRef.current.update(frequencies)
+            svgRef.current.update(frequencies, opacity)
         }
     }
-
-    useEffect(() => {
-        if (svgRef.current) {
-            let newStyle = coverArtUrl ? `background: liniear-gradient(to bottom, rgba(245, 246, 252, 0.52), rgba(117, 118, 124, 0.78), url(${coverArtUrl}));` : 'background: liniear-gradient(to bottom, rgba(245, 246, 252, 0.26), rgba(117, 118, 124, 0.39))'
-            console.log('changing style', newStyle)
-            svgRef.current.clear()
-            svgRef.current.init(newStyle)
-        }
-    }, [coverArtUrl])
 
     const createSvg = (frequencies) => {
         // console.log("creating visualization graph ", { d3 })
         if (!svgRef.current) {
             svgRef.current = new BarSvgHandler(canvasId, dimensions, scale)
-            // let newStyle = coverArtUrl ? `background: liniear-gradient(to bottom, rgba(117, 118, 124, 0.52), rgba(53, 57, 64, 0.78), url(${coverArtUrl}));` : 'background: liniear-gradient(to bottom, rgba(245, 246, 252, 0.26), rgba(117, 118, 124, 0.39))'
-            // svgRef.current.init(newStyle)
             svgRef.current.init()
         }
 
@@ -231,6 +223,7 @@ export default function Bar({ audioUrl, coverArtUrl, width, height, controls = f
         else focusIn()
     }
 
+
     return <>
         <div
             onMouseEnter={focusIn}
@@ -244,7 +237,13 @@ export default function Bar({ audioUrl, coverArtUrl, width, height, controls = f
             onBlur={focusOut}
             onPointerLeave={focusIn}
 
-            style={{ top: 0, left: 0, width: dimensions.WIDTH, height: isControlsVisible ? (dimensions.HEIGHT + dimensions.CONTROLS_HEIGHT) : dimensions.HEIGHT, position: "relative", backgroundColor: "#eeeeeeaa" }}>
+            className="tarang-bar tarang-container"
+            style={{
+                width: (dimensions.WIDTH),
+                height: isControlsVisible ? ((dimensions.HEIGHT) + dimensions.CONTROLS_HEIGHT) : dimensions.HEIGHT * scale.HEIGHT,
+                background: `linear-gradient(to bottom, #aaa6, #aaad)`,
+                background: `linear-gradient(to bottom, #aaa6, #aaad), url(${coverArtUrl})`,
+            }}>
             <div id={canvasId} style={{ "flex": 1, position: "absolute", top: 0, bottom: 0, left: 0, right: 0, overflow: 'hidden' }}>
             </div>
             {
