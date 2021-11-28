@@ -2,8 +2,8 @@ import binaryCeil from "./lib/utils/binaryCeil"
 import binaryFloor from "./lib/utils/binaryFloor"
 import constants from "./lib/Constants"
 import { SvgHandler } from "./lib/SvgHandler"
-import Bar from "./lib/components/Bar"
-import Line from "./lib/components/Line"
+import Bar from "./lib/components/Bar/Bar"
+import Line from "./lib/components/Line/Line"
 
 export const Tarang = {
   Bar,

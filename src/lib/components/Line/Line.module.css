@@ -1,0 +1,27 @@
+.tarangContainer {
+  box-sizing: border-box;
+  position: relative;
+  top: 0;
+  left: 0;
+  background: linear-gradient(to bottom, #aaa6, #aaad);
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.tarangSvgContainer {
+  position: relative;
+  top: 0;
+  left: 0;
+  overflow: 'hidden';
+}
+
+.tarangContorlsContainer {
+  position: relative;
+  bottom: 0;
+  left: 0;
+}
+
+.tarangControls {
+  
+}

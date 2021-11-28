@@ -1,54 +1,10 @@
 import React, { useEffect, useRef, useState, Fragment } from "react";
-import binaryFloor from "../utils/binaryFloor";
-import constants from "../Constants";
-const initialDimensions = constants.DEFAULT_DIMENSIONS
+import Constants from "../../Constants";
+const initialDimensions = Constants.DEFAULT_DIMENSIONS
 import idman from 'idman';
-import { SvgHandler } from "../SvgHandler";
+import { BarSvgHandler } from "./BarSvgHandler";
 const { getNextId } = idman;
-
-class BarSvgHandler extends SvgHandler {
-    constructor(canvasId, dimensions, scale = 1) {
-        super(canvasId, dimensions, scale)
-        this.BAR_PADDING = 1
-    }
-    init(style) {
-        const { canvasId, customScale, dimensions, d3 } = this
-        this.graph = d3.select('#' + canvasId)
-            .append('svg')
-            .attr('height', dimensions.HEIGHT)
-            .attr('width', dimensions.WIDTH)
-            .attr('class', 'my-1')
-            .attr('style', style)
-            .attr('id', "bar_" + canvasId + "_" + getNextId());
-    }
-    update(frequencies, opacity = 1) {
-        const { BAR_PADDING, dimensions, graph, scale } = this
-        graph.selectAll('rect')
-            .data(frequencies)
-            .enter()
-            .append('rect')
-            // .attr('fill-opacity', function (d) {
-            //     return opacity
-            // })
-            .attr('fill', function (d) {
-                return "#000"
-            })
-            .attr('width', dimensions.WIDTH / frequencies.length - BAR_PADDING)
-            .attr('x', function (d, i) {
-                return i * ((dimensions.WIDTH * scale.WIDTH) / frequencies.length);
-                // return i * (dimensions.WIDTH / frequencies.length);
-            })
-        graph.selectAll('rect')
-            .data(frequencies)
-            .attr('y', function (d, i) {
-                return dimensions.HEIGHT - (d * scale.HEIGHT)
-            })
-            .attr('height', function (d, i) {
-                return (d * scale.HEIGHT)
-            });
-    }
-}
-
+import barStyle from "./Bar.module.css"
 
 export default function Bar({ audioUrl, coverArtUrl, width, height, controls = false, muted = false, volume = 0.8, scale = 1, opacity }) {
     // TODO: add state loaded. to check that the user has interacted with the page. so that the autoplay functionality can also be added in future
@@ -80,26 +36,36 @@ export default function Bar({ audioUrl, coverArtUrl, width, height, controls = f
         }
     }, [width])
 
+
     useEffect(() => {
         clearSvg()
         if (!isNaN(height) && height != dimensions.HEIGHT) {
-            if (height > dimensions.CONTROLS_HEIGHT * 2) {
+            if (controls) {
+                if (height > dimensions.CONTROLS_HEIGHT * 2) {
+                    setDimensions(newDimensions => {
+                        return {
+                            ...newDimensions,
+                            HEIGHT: height
+                        }
+                    });
+                } else {
+                    setDimensions(newDimensions => {
+                        return {
+                            ...newDimensions,
+                            HEIGHT: dimensions.CONTROLS_HEIGHT * 2
+                        }
+                    });
+                }
+            } else {
                 setDimensions(newDimensions => {
                     return {
                         ...newDimensions,
                         HEIGHT: height
                     }
                 });
-            } else {
-                setDimensions(newDimensions => {
-                    return {
-                        ...newDimensions,
-                        HEIGHT: dimensions.CONTROLS_HEIGHT * 2
-                    }
-                });
             }
         }
-    }, [height])
+    }, [height, controls])
 
     useEffect(() => {
         if (audioSrcRef.current && audioContextRef.current) {
@@ -223,7 +189,6 @@ export default function Bar({ audioUrl, coverArtUrl, width, height, controls = f
         else focusIn()
     }
 
-
     return <>
         <div
             onMouseEnter={focusIn}
@@ -237,24 +202,22 @@ export default function Bar({ audioUrl, coverArtUrl, width, height, controls = f
             onBlur={focusOut}
             onPointerLeave={focusIn}
 
-            className="tarang-bar tarang-container"
+            className={" ".concat(barStyle.tarangContainer, " ", "tarang-bar")}
             style={{
                 width: (dimensions.WIDTH),
-                height: isControlsVisible ? ((dimensions.HEIGHT) + dimensions.CONTROLS_HEIGHT) : dimensions.HEIGHT * scale.HEIGHT,
-                background: `linear-gradient(to bottom, #aaa6, #aaad)`,
-                background: `linear-gradient(to bottom, #aaa6, #aaad), url(${coverArtUrl})`,
+                height: isControlsVisible ? ((dimensions.HEIGHT) + dimensions.CONTROLS_HEIGHT) : dimensions.HEIGHT,
+                backgroundImage: `linear-gradient(to bottom, #aaa6, #aaad), url(${coverArtUrl})`,
             }}>
-            <div id={canvasId} style={{ "flex": 1, position: "absolute", top: 0, bottom: 0, left: 0, right: 0, overflow: 'hidden' }}>
+            <div className={barStyle.tarangSvgContainer} id={canvasId} style={{
+                width: dimensions.WIDTH,
+                height: dimensions.HEIGHT
+            }}>
             </div>
-            {
-                isControlsVisible ?
-                    <div style={{ "flex": 1, position: "absolute", height: dimensions.CONTROLS_HEIGHT, bottom: 0, left: 0, right: 0 }} >
-                        <button onClick={play}>Play</button>
-                        <button onClick={stop}>Stop</button>
-                        <button onClick={toggleMute}>{isMute ? "Unmute" : "Mute"}</button>
-                    </div> : <>
-                    </>
-            }
+            {isControlsVisible ? <div className={barStyle.tarangContorlsContainer} style={{ height: dimensions.CONTROLS_HEIGHT }}>
+                <button className={" ".concat(barStyle.tarangControls, " ", barStyle.tarangControlPlay)} onClick={play}>Play</button>
+                <button className={" ".concat(barStyle.tarangControls, " ", barStyle.tarangControlStop)} onClick={stop}>Stop</button>
+                <button className={" ".concat(barStyle.tarangControls, " ", barStyle.tarangControlMute)} onClick={toggleMute}>{isMute ? "Unmute" : "Mute"}</button>
+            </div> : null}
         </div>
     </>
 }

@@ -9,6 +9,8 @@ const App = () => {
     {
       audioUrl: "https://tarang.surge.sh/audio/example.mp3",
       coverArtUrl: "https://tarang.surge.sh/images/example-cover.png"
+      // audioUrl: "http://192.168.1.23:8080/audio/example.mp3",
+      // coverArtUrl: "http://192.168.1.23:8080/images/example-cover.png"
     }
   ]
 
@@ -116,7 +118,7 @@ const App = () => {
                     </tr>
                     <tr>
                       <td>
-                        <div style={{ position: 'relative' }}
+                        <div 
                           title={JSON.stringify({
                             width: lineDimensions.WIDTH,
                             height: lineDimensions.HEIGHT,
@@ -165,7 +167,7 @@ const App = () => {
                     </tr>
                     <tr>
                       <td>
-                        <div style={{ position: 'relative' }}
+                        <div 
                           title={JSON.stringify({
                             width: barDimensions.WIDTH,
                             height: barDimensions.HEIGHT,
@@ -216,7 +218,9 @@ const App = () => {
                     </tr>
                     <tr>
                       <td>
-                        <div style={{ position: 'relative' }} title={
+                        <div 
+                        style={{float: "right"}}
+                         title={
                           JSON.stringify({
                             width: lineDimensions.WIDTH,
                             height: lineDimensions.HEIGHT / 2,
@@ -265,13 +269,13 @@ const App = () => {
                     </tr>
                     <tr>
                       <td>
-                        <div style={{ position: 'relative' }} title={JSON.stringify({
+                        <div  title={JSON.stringify({
                           width: barDimensions.WIDTH,
                           height: barDimensions.HEIGHT / 2,
                           controls: barControlsVisible,
                           audioUrl: srcArray[src].audioUrl,
                           coverArtUrl: srcArray[src].coverArtUrl,
-                          scale: 0.9
+                          scale: 0.5
                         }, null, 4)}>
                           {
                             barVisualizationUpdating ?
@@ -282,7 +286,7 @@ const App = () => {
                                 controls={barControlsVisible}
                                 audioUrl={srcArray[src].audioUrl}
                                 coverArtUrl={srcArray[src].coverArtUrl}
-                                scale={0.9}
+                                scale={0.5}
                               />
                           }
                         </div>
@@ -316,7 +320,7 @@ const App = () => {
                     <tr>
                       <td>
                         <div
-                          style={{ position: 'relative' }}
+                          
                           title={JSON.stringify({
                             width: lineDimensions.WIDTH,
                             controls: lineControlsVisible,
@@ -364,7 +368,7 @@ const App = () => {
                     <tr>
                       <td>
                         <div
-                          style={{ position: 'relative' }}
+                          
                           title={JSON.stringify({
                             width: barDimensions.WIDTH,
                             controls: barControlsVisible,

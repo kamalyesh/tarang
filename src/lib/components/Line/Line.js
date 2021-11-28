@@ -1,43 +1,10 @@
 import React, { useEffect, useRef, useState, Fragment } from "react";
-import binaryFloor from "../utils/binaryFloor";
-import constants from "../Constants";
-const initialDimensions = constants.DEFAULT_DIMENSIONS
+import Constants from "../../Constants";
+const initialDimensions = Constants.DEFAULT_DIMENSIONS
 import idman from 'idman';
-import { SvgHandler } from "../SvgHandler";
 const { getNextId } = idman;
-
-class LineSvgHandler extends SvgHandler {
-    constructor(canvasId, dimensions, scale = 1) {
-        super(canvasId, dimensions, scale)
-    }
-    init(background) {
-        const { canvasId, customScale, dimensions, d3 } = this
-        this.graph = d3.select('#' + canvasId)
-            .append('svg')
-            .attr('height', dimensions.HEIGHT)
-            .attr('width', dimensions.WIDTH)
-            .attr('class', 'my-1')
-            .attr('style', `${background}`)
-            .attr('id', "line_" + canvasId + "_" + getNextId());
-    }
-    update(frequencies, opacity) {
-        const { dimensions, d3, graph, scale } = this
-        this.clear()
-        var lineFunc = d3.line()
-            .x(function (d, i) {
-                // return i * dimensions.WIDTH / frequencies.length;
-                return i * dimensions.WIDTH * scale.WIDTH / frequencies.length;
-            })
-            .y(function (d) {
-                return dimensions.HEIGHT - (d * scale.HEIGHT);
-            })
-        graph.append('path')
-            .attr('d', lineFunc(frequencies))
-            .attr('stroke', 'black')
-            // .attr('fill-opacity', opacity)
-            .attr('fill', 'none')
-    }
-}
+import { LineSvgHandler } from "./LineSvgHandler";
+import lineStyle from "./Line.module.css"
 
 export default function Line({ audioUrl, coverArtUrl, width, height, controls = false, muted = false, volume = 0.8, scale = 1, opacity }) {
     // TODO: add state loaded. to check that the user has interacted with the page. so that the autoplay functionality can also be added in future
@@ -62,7 +29,8 @@ export default function Line({ audioUrl, coverArtUrl, width, height, controls = 
             setDimensions(newDimensions => {
                 return {
                     ...newDimensions,
-                    WIDTH: binaryFloor(width)
+                    // WIDTH: binaryFloor(width)
+                    WIDTH: width
                 }
             });
         }
@@ -71,23 +39,32 @@ export default function Line({ audioUrl, coverArtUrl, width, height, controls = 
     useEffect(() => {
         clearSvg()
         if (!isNaN(height) && height != dimensions.HEIGHT) {
-            if (height > dimensions.CONTROLS_HEIGHT * 2) {
+            if (controls) {
+                if (height > dimensions.CONTROLS_HEIGHT * 2) {
+                    setDimensions(newDimensions => {
+                        return {
+                            ...newDimensions,
+                            HEIGHT: height
+                        }
+                    });
+                } else {
+                    setDimensions(newDimensions => {
+                        return {
+                            ...newDimensions,
+                            HEIGHT: dimensions.CONTROLS_HEIGHT * 2
+                        }
+                    });
+                }
+            } else {
                 setDimensions(newDimensions => {
                     return {
                         ...newDimensions,
                         HEIGHT: height
                     }
                 });
-            } else {
-                setDimensions(newDimensions => {
-                    return {
-                        ...newDimensions,
-                        HEIGHT: dimensions.CONTROLS_HEIGHT * 2
-                    }
-                });
             }
         }
-    }, [height])
+    }, [height, controls])
 
     useEffect(() => {
         if (audioSrcRef.current && audioContextRef.current) {
@@ -224,25 +201,23 @@ export default function Line({ audioUrl, coverArtUrl, width, height, controls = 
             onMouseLeave={focusOut}
             onBlur={focusOut}
             onPointerLeave={focusIn}
-            
-            className="tarang-line tarang-container"
+
+            className={" ".concat(lineStyle.tarangContainer, " ", "tarang-line")}
             style={{
-                width: (dimensions.WIDTH),
-                height: isControlsVisible ? ((dimensions.HEIGHT) + dimensions.CONTROLS_HEIGHT) : dimensions.HEIGHT * scale.HEIGHT,
-                background: `linear-gradient(to bottom, #aaa6, #aaad)`,
+                width: dimensions.WIDTH,
+                height: isControlsVisible ? ((dimensions.HEIGHT) + dimensions.CONTROLS_HEIGHT) : dimensions.HEIGHT,
                 background: `linear-gradient(to bottom, #aaa6, #aaad), url(${coverArtUrl})`,
             }}>
-            <div id={canvasId} style={{ "flex": 1, position: "absolute", top: 0, bottom: 0, left: 0, right: 0, overflow: 'hidden' }}>
+            <div className={lineStyle.tarangSvgContainer} id={canvasId} style={{
+                width: dimensions.WIDTH,
+                height: dimensions.HEIGHT,
+            }}>
             </div>
-            {
-                isControlsVisible ?
-                    <div style={{ "flex": 1, position: "absolute", height: dimensions.CONTROLS_HEIGHT, bottom: 0, left: 0, right: 0 }} >
-                        <button onClick={play}>Play</button>
-                        <button onClick={stop}>Stop</button>
-                        <button onClick={toggleMute}>{isMute ? "Unmute" : "Mute"}</button>
-                    </div> : <>
-                    </>
-            }
+            {isControlsVisible ? <div className={lineStyle.tarangContorlsContainer} style={{ height: dimensions.CONTROLS_HEIGHT }}>
+                <button className={" ".concat(lineStyle.tarangControls, " ", lineStyle.tarangControlPlay)} onClick={play}>Play</button>
+                <button className={" ".concat(lineStyle.tarangControls, " ", lineStyle.tarangControlStop)} onClick={stop}>Stop</button>
+                <button className={" ".concat(lineStyle.tarangControls, " ", lineStyle.tarangControlMute)} onClick={toggleMute}>{isMute ? "Unmute" : "Mute"}</button>
+            </div> : null}
         </div>
     </>
 }
