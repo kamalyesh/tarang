@@ -1,7 +1,7 @@
 {
   "name": "tarang",
-  "version": "1.0.7",
-  "description": "audio frequency virtualization using d3 graph for react",
+  "version": "1.0.8",
+  "description": "audio frequency visualization using d3 graph for react",
   "author": "kamalyesh",
   "license": "MIT",
   "repository": "kamalyesh/tarang",
