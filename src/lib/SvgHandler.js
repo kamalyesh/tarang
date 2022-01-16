@@ -1,13 +1,12 @@
 import * as d3 from 'd3'
-import idman from 'idman';
-const { getNextId } = idman;
+import { idman } from './utils/idman';
 import Constants from './Constants';
 import binaryFloor from './utils/binaryFloor';
 
 export class SvgHandler {
     constructor(canvasId, dimensions = { ...Constants.DEFAULT_DIMENSIONS }, scale = 1) {
         if (canvasId) this.canvasId = canvasId
-        else this.canvasId = getNextId()
+        else this.canvasId = idman.next()
         this.customScale = scale
         this.scale = { ...Constants.DEFAULT_DIMENSIONS_SCALE }
         if (dimensions) {
@@ -32,13 +31,13 @@ export class SvgHandler {
         let assumedHeight = parseInt(this.dimensions.WIDTH * 0.5)
         if (this.dimensions.HEIGHT - assumedHeight) this.scale.HEIGHT = Math.abs(this.dimensions.HEIGHT - assumedHeight) / assumedHeight * this.customScale
         else this.scale.HEIGHT = this.customScale
-        console.log({ scale: this.scale })
+        // console.log({ scale: this.scale })
     }
     updateSvgWidthScale() {
         let assumedWidth = binaryFloor(this.dimensions.WIDTH * 0.5)
         if (this.dimensions.WIDTH - assumedWidth) this.scale.WIDTH = Math.abs(this.dimensions.WIDTH - assumedWidth) / assumedWidth * this.customScale
         else this.scale.WIDTH = this.customScale
-        console.log({ scale: this.scale })
+        // console.log({ scale: this.scale })
     }
     destroy() {
         this.clear()

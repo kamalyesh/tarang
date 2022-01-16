@@ -1,15 +1,14 @@
 import React, { useEffect, useRef, useState, Fragment } from "react";
 import Constants from "../../Constants";
+import { idman } from '../../utils/idman';
 const initialDimensions = Constants.DEFAULT_DIMENSIONS
-import idman from 'idman';
-const { getNextId } = idman;
 import { LineSvgHandler } from "./LineSvgHandler";
 import lineStyle from "./Line.module.css"
 
 export default function Line({ audioUrl, coverArtUrl, width, height, controls = false, muted = false, volume = 0.8, scale = 1, opacity }) {
     // TODO: add state loaded. to check that the user has interacted with the page. so that the autoplay functionality can also be added in future
     const [isPlaying, setIsPlaying] = useState(false)
-    const [canvasId, setCanvasId] = useState(getNextId())
+    const [canvasId, setCanvasId] = useState(idman.next())
     const [dimensions, setDimensions] = useState(initialDimensions)
     const [isControlsVisible, setIsControlsVisible] = useState(true)
     const [isMute, muteAudio] = useState(true)
@@ -81,6 +80,10 @@ export default function Line({ audioUrl, coverArtUrl, width, height, controls = 
         audioRef.current.volume = volume
     }, [volume])
 
+    useEffect(() => {
+        if (isPlaying) play()
+    }, [audioUrl])
+
     const clearSvg = () => {
         if (svgRef.current) svgRef.current.clear()
         // console.log("clearing svg")
@@ -127,15 +130,16 @@ export default function Line({ audioUrl, coverArtUrl, width, height, controls = 
     // useEffect(updateSvg, [frequencyData])
     const play = () => {
         try {
+            if (isPlaying) stop()
             setIsPlaying(true)
             if (!audioContextRef.current) audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)()
-            let audio = new Audio(audioUrl)
-            audio.crossOrigin = "anonymous"
+            if (!audioRef.current) audioRef.current = new Audio(audioUrl)
+            else audioRef.current.src = audioUrl
+            audioRef.current.crossOrigin = "anonymous"
 
-            if (!audioSrcRef.current) audioSrcRef.current = audioContextRef.current.createMediaElementSource(audio)
-            else audioRef.current = audio
+            if (!audioSrcRef.current) audioSrcRef.current = audioContextRef.current.createMediaElementSource(audioRef.current)
 
-            audioRef.current = audioSrcRef.current.mediaElement
+            // audioRef.current = audioSrcRef.current.mediaElement
 
             audioRef.current.volume = volume
             audioRef.current.load()

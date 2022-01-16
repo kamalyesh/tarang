@@ -1,6 +1,5 @@
 import { SvgHandler } from "../../SvgHandler";
-import idman from 'idman';
-const { getNextId } = idman;
+import { idman } from '../../utils/idman';
 
 export class BarSvgHandler extends SvgHandler {
     constructor(canvasId, dimensions, scale = 1) {
@@ -15,7 +14,7 @@ export class BarSvgHandler extends SvgHandler {
             .attr('width', dimensions.WIDTH)
             .attr('class', 'my-1')
             .attr('style', style)
-            .attr('id', "bar_" + canvasId + "_" + getNextId());
+            .attr('id', "bar_" + canvasId + "_" + idman.next());
     }
     update(frequencies, opacity = 1) {
         const { BAR_PADDING, dimensions, graph, scale } = this

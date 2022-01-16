@@ -1,6 +1,5 @@
 import { SvgHandler } from "../../SvgHandler";
-import idman from 'idman';
-const { getNextId } = idman;
+import { idman } from '../../utils/idman';
 
 export class LineSvgHandler extends SvgHandler {
     constructor(canvasId, dimensions, scale = 1) {
@@ -14,7 +13,7 @@ export class LineSvgHandler extends SvgHandler {
             .attr('width', dimensions.WIDTH)
             .attr('class', 'my-1')
             .attr('style', `${background}`)
-            .attr('id', "line_" + canvasId + "_" + getNextId());
+            .attr('id', "line_" + canvasId + "_" + idman.next());
     }
     update(frequencies, opacity) {
         const { dimensions, d3, graph, scale } = this
