@@ -1,6 +1,6 @@
 {
   "name": "tarang",
-  "version": "1.0.8",
+  "version": "1.1.1",
   "description": "audio frequency visualization using d3 graph for react",
   "author": "kamalyesh",
   "license": "MIT",
@@ -12,6 +12,8 @@
     "node": ">=10"
   },
   "scripts": {
+    "add-privilege": "sudo sysctl kernel.unprivileged_userns_clone=1",
+    "surge": "surge --domain https://tarang-demo.surge.sh ./example/build",
     "build": "microbundle-crl --no-compress --format modern,cjs",
     "start": "microbundle-crl watch --no-compress --format modern,cjs",
     "prepare": "run-s build",

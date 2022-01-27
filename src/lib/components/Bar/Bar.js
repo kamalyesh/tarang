@@ -2,12 +2,25 @@ import React, { useEffect, useRef, useState, Fragment } from "react";
 import Constants from "../../Constants";
 import { idman } from '../../utils/idman';
 const initialDimensions = Constants.DEFAULT_DIMENSIONS
+const playingStatus = Constants.PLAYING_STATUS
 import { BarSvgHandler } from "./BarSvgHandler";
 import barStyle from "./Bar.module.css"
 
-export default function Bar({ audioUrl, coverArtUrl, width, height, controls = false, muted = false, volume = 0.8, scale = 1, opacity }) {
+export default function Bar({
+    audioUrl,
+    onEnded,
+    loop = false,
+    coverArtUrl,
+    width,
+    height,
+    controls = false,
+    muted = false,
+    volume = 0.8,
+    scale = 1,
+    opacity }) {
     // TODO: add state loaded. to check that the user has interacted with the page. so that the autoplay functionality can also be added in future
-    const [isPlaying, setIsPlaying] = useState(false)
+    const [prevAudioUrl, setPrevAudioUrl] = useState("")
+    const [isPlaying, setIsPlaying] = useState(playingStatus.STOPPED)
     const [canvasId, setCanvasId] = useState(idman.next())
     const [dimensions, setDimensions] = useState(initialDimensions)
     const [isMute, muteAudio] = useState(false)
@@ -82,7 +95,7 @@ export default function Bar({ audioUrl, coverArtUrl, width, height, controls = f
     }, [volume])
 
     useEffect(() => {
-        if (isPlaying) play()
+        if (isPlaying == playingStatus.PLAYING) play()
     }, [audioUrl])
 
     const clearSvg = () => {
@@ -131,30 +144,43 @@ export default function Bar({ audioUrl, coverArtUrl, width, height, controls = f
     // useEffect(updateSvg, [frequencyData])
     const play = () => {
         try {
-            if (isPlaying) stop()
-            setIsPlaying(true)
-            if (!audioContextRef.current) audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)()
-            if (!audioRef.current) audioRef.current = new Audio(audioUrl)
-            else audioRef.current.src = audioUrl
-            audioRef.current.crossOrigin = "anonymous"
+            if (!audioUrl) return;
+            if (prevAudioUrl != audioUrl) {
+                if (audioRef.current.src) setPrevAudioUrl(audioRef.current.src)
+                else setPrevAudioUrl(audioUrl)
+                if (isPlaying == playingStatus.PLAYING) stop()
+                if (!audioContextRef.current) audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)()
+                if (!audioRef.current) audioRef.current = new Audio(audioUrl)
+                else audioRef.current.src = audioUrl
+                audioRef.current.crossOrigin = "anonymous"
 
-            if (!audioSrcRef.current) audioSrcRef.current = audioContextRef.current.createMediaElementSource(audioRef.current)
+                if (!audioSrcRef.current) audioSrcRef.current = audioContextRef.current.createMediaElementSource(audioRef.current)
 
-            // audioRef.current = audioSrcRef.current.mediaElement
+                // audioRef.current = audioSrcRef.current.mediaElement
 
-            audioRef.current.volume = volume
-            audioRef.current.load()
-            audioRef.current.play()
-            audioRef.current.onended = (event) => clearSvg()
-            analyserRef.current = audioContextRef.current.createAnalyser()
+                audioRef.current.volume = volume
+                audioRef.current.load()
+                audioRef.current.onended = (event) => {
+                    clearSvg();
+                    if (loop) play();
+                    else if (typeof onEnded == "function") {
+                        setIsPlaying(playingStatus.STOPPED);
+                        onEnded();
+                    }
+                }
+                analyserRef.current = audioContextRef.current.createAnalyser()
 
-            audioSrcRef.current.connect(analyserRef.current);
-            if (!isMute) audioSrcRef.current.connect(audioContextRef.current.destination);
+                audioSrcRef.current.connect(analyserRef.current);
+                if (!isMute) audioSrcRef.current.connect(audioContextRef.current.destination);
 
+            }
+
+            setIsPlaying(playingStatus.PLAYING)
             analyserRef.current.fftSize = dimensions.WIDTH;
             const bufferLength = analyserRef.current.frequencyBinCount;
             const frequencies = new Uint8Array(bufferLength);
             analyserRef.current.getByteFrequencyData(frequencies);
+            audioRef.current.play()
             // console.log({ frequencies })
             createSvg(frequencies)
         } catch (error) {
@@ -162,8 +188,13 @@ export default function Bar({ audioUrl, coverArtUrl, width, height, controls = f
         }
     }
 
+    const pause = () => {
+        setIsPlaying(playingStatus.PAUSED)
+        audioRef.current.pause()
+    }
+
     const stop = () => {
-        setIsPlaying(false)
+        setIsPlaying(playingStatus.STOPPED)
         audioRef.current.pause()
         audioRef.current.currentTime = 0
         clearSvg()
@@ -219,7 +250,8 @@ export default function Bar({ audioUrl, coverArtUrl, width, height, controls = f
             }}>
             </div>
             {isControlsVisible ? <div className={barStyle.tarangContorlsContainer} style={{ height: dimensions.CONTROLS_HEIGHT }}>
-                <button className={" ".concat(barStyle.tarangControls, " ", barStyle.tarangControlPlay)} onClick={play}>Play</button>
+                {isPlaying != playingStatus.PLAYING ? <button className={" ".concat(barStyle.tarangControls, " ", barStyle.tarangControlPlay)} onClick={play}>Play</button> : null}
+                {isPlaying == playingStatus.PLAYING ? <button className={" ".concat(barStyle.tarangControls, " ", barStyle.tarangControlStop)} onClick={pause}>Pause</button> : null}
                 <button className={" ".concat(barStyle.tarangControls, " ", barStyle.tarangControlStop)} onClick={stop}>Stop</button>
                 <button className={" ".concat(barStyle.tarangControls, " ", barStyle.tarangControlMute)} onClick={toggleMute}>{isMute ? "Unmute" : "Mute"}</button>
             </div> : null}
