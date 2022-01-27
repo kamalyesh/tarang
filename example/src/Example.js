@@ -412,7 +412,7 @@ const Example = () => {
                     </tr>
                     <tr>
                         <td>
-                            <legend>Virtualization as Line Graph (on loop - please note that loop and onEnded are mutually exclusive)</legend>
+                            <legend>Virtualization as Line Graph (on loop)</legend>
                             <table>
                                 <tbody>
                                     <tr>
@@ -462,7 +462,7 @@ const Example = () => {
                             </table>
                         </td>
                         <td>
-                            <legend>Virtualization as Bar Graph (event on end - please note that loop and onEnded are mutually exclusive)</legend>
+                            <legend>Virtualization as Bar Graph (event on end)</legend>
                             <table>
                                 <tbody>
                                     <tr>

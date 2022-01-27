@@ -76,7 +76,9 @@ class Example extends Component {
 ### Note:
 
   1. make sure that the width is of power of two (e.g., 2, 4, 8, etc)
-  2. `loop` and `onEnded` are mutually exclusive, i.e., you may either use `loop` or `onEnded`. If both are specified at the same time, `loop` will take precedent and `onEnded` will be ignored.
+  2. `loop` and `onEnded` if used together, can be used to change the track after current track has ended.
+
+
 ## License
 
 MIT © [kamalyesh](https://github.com/kamalyesh)

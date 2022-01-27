@@ -162,11 +162,12 @@ export default function Bar({
                 audioRef.current.load()
                 audioRef.current.onended = (event) => {
                     clearSvg();
-                    if (loop) play();
-                    else if (typeof onEnded == "function") {
-                        setIsPlaying(playingStatus.STOPPED);
+                    if (typeof onEnded == "function") {
                         onEnded();
+                        if (loop) play()
                     }
+                    else if (loop) play()
+                    else setIsPlaying(playingStatus.STOPPED);
                 }
                 analyserRef.current = audioContextRef.current.createAnalyser()
 

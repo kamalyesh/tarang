@@ -161,11 +161,12 @@ export default function Line({
                 audioRef.current.load()
                 audioRef.current.onended = (event) => {
                     clearSvg();
-                    if (loop) play()
                     if (typeof onEnded == "function") {
-                        setIsPlaying(playingStatus.STOPPED);
                         onEnded();
+                        if (loop) play()
                     }
+                    else if (loop) play()
+                    else setIsPlaying(playingStatus.STOPPED);
                 }
                 analyserRef.current = audioContextRef.current.createAnalyser()
 
